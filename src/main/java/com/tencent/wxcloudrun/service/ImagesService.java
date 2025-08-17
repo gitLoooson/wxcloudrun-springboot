@@ -1,28 +1,25 @@
 package com.tencent.wxcloudrun.service;
 
-import com.tencent.wxcloudrun.dao.ImagesMapper;
-import com.tencent.wxcloudrun.model.Images;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import com.tencent.wxcloudrun.model.Image;
 
 public interface ImagesService {
 
     public int deleteByPrimaryKey(Integer id);
 
 
-    public int insert(Images record);
+    public int insert(Image record);
 
 
-    public int insertSelective(Images record);
+    public int insertSelective(Image record);
 
 
-    public Images selectByPrimaryKey(Integer id);
+    public Image selectByPrimaryKey(Integer id);
 
 
-    public int updateByPrimaryKeySelective(Images record);
+    public int updateByPrimaryKeySelective(Image record);
 
 
-    public int updateByPrimaryKey(Images record);
+    public int updateByPrimaryKey(Image record);
 
-    public Images[] selectAllImages();
+    public Image[] selectAllImages();
 }

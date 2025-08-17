@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.tencent.wxcloudrun.dao.ImagesMapper">
-  <resultMap id="BaseResultMap" type="com.tencent.wxcloudrun.model.Images">
+  <resultMap id="BaseResultMap" type="com.tencent.wxcloudrun.model.Image">
     <!--@mbg.generated-->
     <!--@Table images-->
     <id column="id" jdbcType="INTEGER" property="id" />
@@ -28,7 +28,7 @@
     delete from images
     where id = #{id,jdbcType=INTEGER}
   </delete>
-  <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.tencent.wxcloudrun.model.Images" useGeneratedKeys="true">
+  <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.tencent.wxcloudrun.model.Image" useGeneratedKeys="true">
     <!--@mbg.generated-->
     insert into images (file_id, `path`, param_name, 
       `desc`, create_date, update_date
@@ -37,7 +37,7 @@
       #{desc,jdbcType=VARCHAR}, #{createDate,jdbcType=TIMESTAMP}, #{updateDate,jdbcType=TIMESTAMP}
       )
   </insert>
-  <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.tencent.wxcloudrun.model.Images" useGeneratedKeys="true">
+  <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.tencent.wxcloudrun.model.Image" useGeneratedKeys="true">
     <!--@mbg.generated-->
     insert into images
     <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -81,7 +81,7 @@
       </if>
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="com.tencent.wxcloudrun.model.Images">
+  <update id="updateByPrimaryKeySelective" parameterType="com.tencent.wxcloudrun.model.Image">
     <!--@mbg.generated-->
     update images
     <set>
@@ -106,7 +106,7 @@
     </set>
     where id = #{id,jdbcType=INTEGER}
   </update>
-  <update id="updateByPrimaryKey" parameterType="com.tencent.wxcloudrun.model.Images">
+  <update id="updateByPrimaryKey" parameterType="com.tencent.wxcloudrun.model.Image">
     <!--@mbg.generated-->
     update images
     set file_id = #{fileId,jdbcType=VARCHAR},
@@ -118,7 +118,7 @@
     where id = #{id,jdbcType=INTEGER}
   </update>
 
-  <select id="selectAll" resultMap="BaseResultMap">
+  <select id="selectAll" resultType="com.tencent.wxcloudrun.model.Image">
       select * from images
     </select>
 </mapper>

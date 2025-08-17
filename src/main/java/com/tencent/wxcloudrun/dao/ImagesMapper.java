@@ -1,19 +1,19 @@
 package com.tencent.wxcloudrun.dao;
 
-import com.tencent.wxcloudrun.model.Images;
+import com.tencent.wxcloudrun.model.Image;
 
 public interface ImagesMapper {
     int deleteByPrimaryKey(Integer id);
 
-    int insert(Images record);
+    int insert(Image record);
 
-    int insertSelective(Images record);
+    int insertSelective(Image record);
 
-    Images selectByPrimaryKey(Integer id);
+    Image selectByPrimaryKey(Integer id);
 
-    int updateByPrimaryKeySelective(Images record);
+    int updateByPrimaryKeySelective(Image record);
 
-    int updateByPrimaryKey(Images record);
+    int updateByPrimaryKey(Image record);
 
-    Images[] selectAll();
+    Image[] selectAll();
 }
