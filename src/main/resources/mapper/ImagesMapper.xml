@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tencent.wxcloudrun.dao.ImagesMapper">
+  <resultMap id="BaseResultMap" type="com.tencent.wxcloudrun.model.Images">
+    <!--@mbg.generated-->
+    <!--@Table images-->
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="file_id" jdbcType="VARCHAR" property="fileId" />
+    <result column="path" jdbcType="VARCHAR" property="path" />
+    <result column="param_name" jdbcType="VARCHAR" property="paramName" />
+    <result column="desc" jdbcType="VARCHAR" property="desc" />
+    <result column="create_date" jdbcType="TIMESTAMP" property="createDate" />
+    <result column="update_date" jdbcType="TIMESTAMP" property="updateDate" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, file_id, `path`, param_name, `desc`, create_date, update_date
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    <!--@mbg.generated-->
+    select 
+    <include refid="Base_Column_List" />
+    from images
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    <!--@mbg.generated-->
+    delete from images
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.tencent.wxcloudrun.model.Images" useGeneratedKeys="true">
+    <!--@mbg.generated-->
+    insert into images (file_id, `path`, param_name, 
+      `desc`, create_date, update_date
+      )
+    values (#{fileId,jdbcType=VARCHAR}, #{path,jdbcType=VARCHAR}, #{paramName,jdbcType=VARCHAR}, 
+      #{desc,jdbcType=VARCHAR}, #{createDate,jdbcType=TIMESTAMP}, #{updateDate,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.tencent.wxcloudrun.model.Images" useGeneratedKeys="true">
+    <!--@mbg.generated-->
+    insert into images
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="fileId != null">
+        file_id,
+      </if>
+      <if test="path != null">
+        `path`,
+      </if>
+      <if test="paramName != null">
+        param_name,
+      </if>
+      <if test="desc != null">
+        `desc`,
+      </if>
+      <if test="createDate != null">
+        create_date,
+      </if>
+      <if test="updateDate != null">
+        update_date,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="fileId != null">
+        #{fileId,jdbcType=VARCHAR},
+      </if>
+      <if test="path != null">
+        #{path,jdbcType=VARCHAR},
+      </if>
+      <if test="paramName != null">
+        #{paramName,jdbcType=VARCHAR},
+      </if>
+      <if test="desc != null">
+        #{desc,jdbcType=VARCHAR},
+      </if>
+      <if test="createDate != null">
+        #{createDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateDate != null">
+        #{updateDate,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.tencent.wxcloudrun.model.Images">
+    <!--@mbg.generated-->
+    update images
+    <set>
+      <if test="fileId != null">
+        file_id = #{fileId,jdbcType=VARCHAR},
+      </if>
+      <if test="path != null">
+        `path` = #{path,jdbcType=VARCHAR},
+      </if>
+      <if test="paramName != null">
+        param_name = #{paramName,jdbcType=VARCHAR},
+      </if>
+      <if test="desc != null">
+        `desc` = #{desc,jdbcType=VARCHAR},
+      </if>
+      <if test="createDate != null">
+        create_date = #{createDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateDate != null">
+        update_date = #{updateDate,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.tencent.wxcloudrun.model.Images">
+    <!--@mbg.generated-->
+    update images
+    set file_id = #{fileId,jdbcType=VARCHAR},
+      `path` = #{path,jdbcType=VARCHAR},
+      param_name = #{paramName,jdbcType=VARCHAR},
+      `desc` = #{desc,jdbcType=VARCHAR},
+      create_date = #{createDate,jdbcType=TIMESTAMP},
+      update_date = #{updateDate,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <select id="selectAll" resultMap="BaseResultMap">
+      select * from images
+    </select>
+</mapper>
