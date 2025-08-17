@@ -3,6 +3,7 @@ package com.tencent.wxcloudrun.model;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 import java.util.Date;
 @Data
 public class Image implements Serializable {
@@ -31,11 +32,11 @@ public class Image implements Serializable {
     /**
      * 创建时间
      */
-    private Date createDate;
+    private Timestamp createDate;
 
     /**
      * 修改时间
      */
-    private Date updateDate;
+    private Timestamp updateDate;
 
 }
