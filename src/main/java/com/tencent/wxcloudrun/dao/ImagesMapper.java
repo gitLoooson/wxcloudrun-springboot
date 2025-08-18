@@ -1,7 +1,9 @@
 package com.tencent.wxcloudrun.dao;
 
 import com.tencent.wxcloudrun.model.Image;
+import org.apache.ibatis.annotations.Mapper;
 
+@Mapper
 public interface ImagesMapper {
     int deleteByPrimaryKey(Integer id);
 

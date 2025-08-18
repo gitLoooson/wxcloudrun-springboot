@@ -17,3 +17,11 @@ mybatis:
   mapper-locations: classpath*:mapper/*Mapper.xml
   configuration:
     map-underscore-to-camel-case: true
+
+jwt:
+  secret: ${JWT_SECRET:123} # 设置一个复杂的密钥
+  expire: 604800 # token有效期(秒)，这里设置7天
+  issuer: ${ISSUER:123}
+wx:
+  appid: ${WX_APPID:123}
+  secret: ${WX_SECRET:123}
