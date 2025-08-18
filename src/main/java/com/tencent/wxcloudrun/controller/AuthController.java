@@ -8,6 +8,9 @@ import com.tencent.wxcloudrun.service.impl.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -18,7 +21,9 @@ public class AuthController {
     public ApiResponse login(@RequestBody LoginRequest loginRequest) {
         try {
             String token = userService.loginOrRegister(loginRequest.getCode(), loginRequest.getUsername(), loginRequest.getAvatar());
-            return ApiResponse.ok(token);
+            Map<String, String> result = new HashMap<>();
+            result.put("token", token);
+            return ApiResponse.ok(result);
         } catch (Exception e) {
             return ApiResponse.error(e.getMessage());
         }

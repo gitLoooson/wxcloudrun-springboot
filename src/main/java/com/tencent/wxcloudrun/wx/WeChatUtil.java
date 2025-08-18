@@ -1,10 +1,8 @@
 package com.tencent.wxcloudrun.wx;
 
-import com.tencent.wxcloudrun.factory.RestTemplateFactory;
 import com.tencent.wxcloudrun.utils.HttpClientUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +15,6 @@ public class WeChatUtil {
     @Value("${wx.secret}")
     private String secret;
 
-    private final RestTemplate restTemplate = RestTemplateFactory.create();
 
     public Map<String, String> getSessionKeyOrOpenId(String code) {
         String url = "https://api.weixin.qq.com/sns/jscode2session";
