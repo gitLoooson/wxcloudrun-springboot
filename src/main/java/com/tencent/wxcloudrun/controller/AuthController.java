@@ -2,6 +2,7 @@ package com.tencent.wxcloudrun.controller;
 
 
 import com.tencent.wxcloudrun.config.ApiResponse;
+import com.tencent.wxcloudrun.dto.LoginRequest;
 import com.tencent.wxcloudrun.model.User;
 import com.tencent.wxcloudrun.service.impl.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,11 +15,9 @@ public class AuthController {
     private UserService userService;
 
     @PostMapping("/login")
-    public ApiResponse login(@RequestParam String code,
-                             @RequestParam String username,
-                             @RequestParam String avatar) {
+    public ApiResponse login(@RequestBody LoginRequest loginRequest) {
         try {
-            String token = userService.loginOrRegister(code, username, avatar);
+            String token = userService.loginOrRegister(loginRequest.getCode(), loginRequest.getUsername(), loginRequest.getAvatar());
             return ApiResponse.ok(token);
         } catch (Exception e) {
             return ApiResponse.error(e.getMessage());
@@ -35,3 +34,5 @@ public class AuthController {
         }
     }
 }
+
+
