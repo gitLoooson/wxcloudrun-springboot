@@ -1,6 +1,8 @@
 package com.tencent.wxcloudrun.controller;
 
 
+import com.tencent.wxcloudrun.anno.roles.RequiresRoles;
+import com.tencent.wxcloudrun.anno.roles.RoleEnum;
 import com.tencent.wxcloudrun.config.ApiResponse;
 import com.tencent.wxcloudrun.dto.LoginRequest;
 import com.tencent.wxcloudrun.model.User;
@@ -30,6 +32,7 @@ public class AuthController {
     }
 
     @GetMapping("/userInfo")
+    @RequiresRoles({RoleEnum.ADMIN_COURT})
     public ApiResponse getUserInfo(@RequestHeader("Authorization") String token) {
         try {
             User user = userService.getUserByToken(token);

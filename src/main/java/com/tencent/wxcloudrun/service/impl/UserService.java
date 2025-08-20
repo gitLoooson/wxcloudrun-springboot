@@ -47,7 +47,7 @@ public class UserService {
         }
 
         // 5. 生成并返回token
-        return jwtUtil.generateToken(openid);
+        return jwtUtil.generateToken(openid,user.getId());
     }
 
     public User getUserByToken(String token) {

@@ -1,6 +1,7 @@
 package com.tencent.wxcloudrun.config;
 
 import com.tencent.wxcloudrun.interceptor.JwtInterceptor;
+import com.tencent.wxcloudrun.interceptor.RoleInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -12,6 +13,9 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Autowired
     private JwtInterceptor jwtInterceptor;
+
+    @Autowired
+    private RoleInterceptor roleInterceptor;
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
@@ -27,6 +31,10 @@ public class WebConfig implements WebMvcConfigurer {
                         "/doc.html",          // 放行swagger-ui
                         "/images/getAllImages" // 放行获取所有图片接口
                 );
+
+        registry.addInterceptor(roleInterceptor)
+                .addPathPatterns("/**") // 拦截所有路径
+                .excludePathPatterns("/login", "/register"); // 排除不需要拦截的路径
     }
 
     @Override

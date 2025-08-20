@@ -21,12 +21,13 @@ public class JwtUtil {
     @Value("${jwt.issuer}")
     private String issuer;
 
-    public String generateToken(String openid) {
+    public String generateToken(String openid, Long id) {
         Date now = new Date();
         Date expireDate = new Date(now.getTime() + expire * 1000);
 
         Map<String, Object> claims = new HashMap<>();
         claims.put("openid", openid);
+        claims.put("userId", id);
 
         return Jwts.builder()
                 .setClaims(claims)
@@ -46,6 +47,10 @@ public class JwtUtil {
 
     public String getOpenidFromToken(String token) {
         return getClaimsFromToken(token).get("openid", String.class);
+    }
+
+    public Long getUserIdFromToken(String token) {
+        return getClaimsFromToken(token).get("userId", Long.class);
     }
 
     public boolean validateToken(String token) {
