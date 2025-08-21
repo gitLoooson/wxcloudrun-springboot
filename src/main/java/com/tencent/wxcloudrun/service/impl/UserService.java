@@ -1,12 +1,16 @@
 package com.tencent.wxcloudrun.service.impl;
 
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.tencent.wxcloudrun.dao.UserMapper;
+import com.tencent.wxcloudrun.dto.UserWithRolesDTO;
 import com.tencent.wxcloudrun.jwt.JwtUtil;
 import com.tencent.wxcloudrun.model.User;
 import com.tencent.wxcloudrun.wx.WeChatUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -41,9 +45,9 @@ public class UserService {
             userMapper.insert(user);
         } else {
             // 4. 存在则更新用户信息(可选)
-            user.setUsername(username);
-            user.setAvatar(avatar);
-            userMapper.update(user);
+//            user.setUsername(username);
+//            user.setAvatar(avatar);
+//            userMapper.update(user);
         }
 
         // 5. 生成并返回token
@@ -52,5 +56,9 @@ public class UserService {
 
     public User getUserByOpenId(String openid) {
         return userMapper.findByOpenid(openid);
+    }
+
+    public List<UserWithRolesDTO> selectAllUsersWithRoles(Page<UserWithRolesDTO> page) {
+        return userMapper.selectAllUsersWithRoles(page);
     }
 }
