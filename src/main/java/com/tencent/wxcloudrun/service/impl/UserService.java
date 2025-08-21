@@ -50,8 +50,7 @@ public class UserService {
         return jwtUtil.generateToken(openid,user.getId());
     }
 
-    public User getUserByToken(String token) {
-        String openid = jwtUtil.getOpenidFromToken(token);
+    public User getUserByOpenId(String openid) {
         return userMapper.findByOpenid(openid);
     }
 }

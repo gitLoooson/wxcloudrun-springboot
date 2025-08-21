@@ -1,8 +1,6 @@
 package com.tencent.wxcloudrun.controller;
 
 
-import com.tencent.wxcloudrun.anno.roles.RequiresRoles;
-import com.tencent.wxcloudrun.anno.roles.RoleEnum;
 import com.tencent.wxcloudrun.config.ApiResponse;
 import com.tencent.wxcloudrun.dto.LoginRequest;
 import com.tencent.wxcloudrun.model.User;
@@ -10,6 +8,7 @@ import com.tencent.wxcloudrun.service.impl.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,10 +31,9 @@ public class AuthController {
     }
 
     @GetMapping("/userInfo")
-    @RequiresRoles({RoleEnum.ADMIN_COURT})
-    public ApiResponse getUserInfo(@RequestHeader("Authorization") String token) {
+    public ApiResponse getUserInfo(HttpServletRequest request) {
         try {
-            User user = userService.getUserByToken(token);
+            User user = userService.getUserByOpenId(request.getAttribute("openId").toString());
             return ApiResponse.ok(user);
         } catch (Exception e) {
             return ApiResponse.error(e.getMessage());

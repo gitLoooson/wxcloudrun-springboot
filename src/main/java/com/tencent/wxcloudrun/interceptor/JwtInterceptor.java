@@ -1,8 +1,10 @@
 package com.tencent.wxcloudrun.interceptor;
 
 
+import com.tencent.wxcloudrun.anno.RequestAttr;
 import com.tencent.wxcloudrun.jwt.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -10,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 @Component
+@Order(0)
 public class JwtInterceptor implements HandlerInterceptor {
 
     @Autowired
@@ -41,8 +44,8 @@ public class JwtInterceptor implements HandlerInterceptor {
             }
 
             // 验证通过，将openid存入request属性，方便后续使用
-            String openid = jwtUtil.getOpenidFromToken(token);
-            request.setAttribute("openid", openid);
+            RequestAttr.OPEN_ID.set(request, jwtUtil.getOpenidFromToken(token));
+            RequestAttr.USER_ID.set(request, jwtUtil.getUserIdFromToken(token));
             return true;
 
         } catch (Exception e) {
