@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -22,10 +21,7 @@ public class AuthController {
     @PostMapping("/login")
     public ApiResponse login(HttpServletRequest request,@RequestBody LoginRequestDTO loginRequest) {
         try {
-            String token = userService.loginOrRegister(loginRequest.getCode(), loginRequest.getUsername(), loginRequest.getAvatar());
-            Map<String, Object> result = new HashMap<>();
-            result.put("token", token);
-            result.put("user", userService.getUserByOpenId(loginRequest.getCode()));
+            Map<String, Object> result = userService.loginOrRegister(loginRequest.getCode(), loginRequest.getUsername(), loginRequest.getAvatar());
             return ApiResponse.ok(result);
         } catch (Exception e) {
             return ApiResponse.error(e.getMessage());

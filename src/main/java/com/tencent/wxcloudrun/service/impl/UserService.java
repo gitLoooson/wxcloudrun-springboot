@@ -10,6 +10,7 @@ import com.tencent.wxcloudrun.wx.WeChatUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @Service
@@ -23,7 +24,7 @@ public class UserService {
     @Autowired
     private JwtUtil jwtUtil;
 
-    public String loginOrRegister(String code, String username, String avatar) {
+    public Map<String, Object> loginOrRegister(String code, String username, String avatar) {
         // 1. 获取微信openid
         Map<String, String> wxResult = weChatUtil.getSessionKeyOrOpenId(code);
         String openid = wxResult.get("openid");
@@ -50,7 +51,11 @@ public class UserService {
         }
 
         // 5. 生成并返回token
-        return jwtUtil.generateToken(openid,user.getId());
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("token", jwtUtil.generateToken(openid,user.getId()));
+        result.put("user", user);
+        return result;
     }
 
     public User getUserByOpenId(String openid) {
