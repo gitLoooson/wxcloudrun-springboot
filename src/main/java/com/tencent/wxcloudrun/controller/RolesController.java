@@ -51,13 +51,14 @@ public class RolesController {
     }
 
     @GetMapping("/getAllRoles")
-//    @RequiresRoles({RoleEnum.ADMIN_COURT})
+    @RequiresRoles({RoleEnum.ADMIN_COURT})
     public ApiResponse getAllRoles(){
         return ApiResponse.ok(rolesService.getAllRoles());
     }
 
     // 更新用户角色
     @PostMapping("/updateUserRoles")
+    @RequiresRoles({RoleEnum.ADMIN_COURT})
     public ApiResponse updateUserRoles(
             @RequestBody UpdateUserRolesRequestDTO request) {
         userRolesService.updateUserRoles(request.getUserId(), request.getRoleIds());
