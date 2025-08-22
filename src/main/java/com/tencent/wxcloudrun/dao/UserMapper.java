@@ -21,4 +21,7 @@ public interface UserMapper {
     int update(User user);
 
     Page<UserWithRolesDTO> selectAllUsersWithRoles(Page<UserWithRolesDTO> page);
+
+    @Update("UPDATE user SET phone_number=#{phoneNumber} WHERE openid=#{openid}")
+    int updatePhoneNumber(User user);
 }

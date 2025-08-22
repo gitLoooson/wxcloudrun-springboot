@@ -1,6 +1,7 @@
 package com.tencent.wxcloudrun.controller;
 
 
+import com.tencent.wxcloudrun.anno.RequestAttr;
 import com.tencent.wxcloudrun.config.ApiResponse;
 import com.tencent.wxcloudrun.dto.LoginRequestDTO;
 import com.tencent.wxcloudrun.model.User;
@@ -19,11 +20,12 @@ public class AuthController {
     private UserService userService;
 
     @PostMapping("/login")
-    public ApiResponse login(@RequestBody LoginRequestDTO loginRequest) {
+    public ApiResponse login(HttpServletRequest request,@RequestBody LoginRequestDTO loginRequest) {
         try {
             String token = userService.loginOrRegister(loginRequest.getCode(), loginRequest.getUsername(), loginRequest.getAvatar());
-            Map<String, String> result = new HashMap<>();
+            Map<String, Object> result = new HashMap<>();
             result.put("token", token);
+            result.put("user", userService.getUserByOpenId(RequestAttr.OPEN_ID.get(request)));
             return ApiResponse.ok(result);
         } catch (Exception e) {
             return ApiResponse.error(e.getMessage());
@@ -33,7 +35,7 @@ public class AuthController {
     @GetMapping("/userInfo")
     public ApiResponse getUserInfo(HttpServletRequest request) {
         try {
-            User user = userService.getUserByOpenId(request.getAttribute("openId").toString());
+            User user = userService.getUserByOpenId(RequestAttr.OPEN_ID.get(request));
             return ApiResponse.ok(user);
         } catch (Exception e) {
             return ApiResponse.error(e.getMessage());

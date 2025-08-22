@@ -13,6 +13,7 @@ public class UserWithRolesDTO {
     private String username;
     private String nickname;
     private String avatar;
+    private String phoneNumber;
     private List<Roles> roles;
     private Date createTime;
 }

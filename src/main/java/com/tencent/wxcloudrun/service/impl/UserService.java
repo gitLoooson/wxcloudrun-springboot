@@ -60,4 +60,8 @@ public class UserService {
     public Page<UserWithRolesDTO> selectAllUsersWithRoles(Page<UserWithRolesDTO> page) {
         return userMapper.selectAllUsersWithRoles(page);
     }
+
+    public int updateUserPhoneNumber(User user) {
+        return userMapper.updatePhoneNumber(user);
+    }
 }

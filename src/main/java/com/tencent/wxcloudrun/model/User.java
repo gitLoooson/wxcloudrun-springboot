@@ -11,6 +11,7 @@ public class User implements Serializable {
     private String openid;
     private String username;
     private String avatar;
+    private String phoneNumber;
     private Date createTime;
     private Date updateTime;
 }
