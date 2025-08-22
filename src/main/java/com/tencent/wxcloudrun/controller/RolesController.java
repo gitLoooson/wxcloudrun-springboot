@@ -7,6 +7,7 @@ import com.tencent.wxcloudrun.anno.roles.RequiresRoles;
 import com.tencent.wxcloudrun.anno.roles.RoleEnum;
 import com.tencent.wxcloudrun.config.ApiResponse;
 import com.tencent.wxcloudrun.dto.UserWithRolesDTO;
+import com.tencent.wxcloudrun.service.impl.RolesService;
 import com.tencent.wxcloudrun.service.impl.UserRolesService;
 import com.tencent.wxcloudrun.service.impl.UserService;
 import com.tencent.wxcloudrun.utils.ResultUtil;
@@ -23,7 +24,8 @@ public class RolesController {
     private UserRolesService userRolesService;
     @Autowired
     private UserService userService;
-
+    @Autowired
+    private RolesService rolesService;
 
     @PostMapping("/getRolesIds")
     public ApiResponse getRolesIds(HttpServletRequest request) {
@@ -45,5 +47,11 @@ public class RolesController {
         Page<UserWithRolesDTO> page = new Page<>(current, size);
         Page<UserWithRolesDTO> users = userService.selectAllUsersWithRoles(page);
         return ApiResponse.ok(ResultUtil.getResultFromPage(users));
+    }
+
+    @GetMapping("/getAllRoles")
+//    @RequiresRoles({RoleEnum.ADMIN_COURT})
+    public ApiResponse getAllRoles(){
+        return ApiResponse.ok(rolesService.getAllRoles());
     }
 }

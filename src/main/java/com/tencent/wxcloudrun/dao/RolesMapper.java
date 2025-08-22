@@ -2,6 +2,8 @@ package com.tencent.wxcloudrun.dao;
 
 import com.tencent.wxcloudrun.model.Roles;
 
+import java.util.List;
+
 public interface RolesMapper {
     int deleteByPrimaryKey(Integer id);
 
@@ -14,4 +16,6 @@ public interface RolesMapper {
     int updateByPrimaryKeySelective(Roles record);
 
     int updateByPrimaryKey(Roles record);
+
+    List<Roles> getAllRoles();
 }

@@ -6,6 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.tencent.wxcloudrun.dao.RolesMapper;
 import com.tencent.wxcloudrun.model.Roles;
+
+import java.util.List;
+
 @Service
 public class RolesService{
 
@@ -40,6 +43,10 @@ public class RolesService{
     
     public int updateByPrimaryKey(Roles record) {
         return rolesMapper.updateByPrimaryKey(record);
+    }
+
+    public List<Roles> getAllRoles() {
+        return rolesMapper.getAllRoles();
     }
 
 }
