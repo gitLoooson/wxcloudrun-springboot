@@ -10,7 +10,6 @@ import com.tencent.wxcloudrun.wx.WeChatUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Map;
 
 @Service
@@ -58,7 +57,7 @@ public class UserService {
         return userMapper.findByOpenid(openid);
     }
 
-    public List<UserWithRolesDTO> selectAllUsersWithRoles(Page<UserWithRolesDTO> page) {
+    public Page<UserWithRolesDTO> selectAllUsersWithRoles(Page<UserWithRolesDTO> page) {
         return userMapper.selectAllUsersWithRoles(page);
     }
 }

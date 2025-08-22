@@ -3,10 +3,13 @@ package com.tencent.wxcloudrun.controller;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.tencent.wxcloudrun.anno.RequestAttr;
+import com.tencent.wxcloudrun.anno.roles.RequiresRoles;
+import com.tencent.wxcloudrun.anno.roles.RoleEnum;
 import com.tencent.wxcloudrun.config.ApiResponse;
 import com.tencent.wxcloudrun.dto.UserWithRolesDTO;
 import com.tencent.wxcloudrun.service.impl.UserRolesService;
 import com.tencent.wxcloudrun.service.impl.UserService;
+import com.tencent.wxcloudrun.utils.ResultUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,13 +37,13 @@ public class RolesController {
         }
     }
 
-//    @RequiresRoles({RoleEnum.ADMIN_COURT})
-    @GetMapping("getAllUsersWithRoles")
+    @RequiresRoles({RoleEnum.ADMIN_COURT})
+    @GetMapping("/getAllUsersWithRoles")
     public ApiResponse getAllUsersWithRoles(
             @RequestParam(defaultValue = "1") Integer current,
             @RequestParam(defaultValue = "10") Integer size){
         Page<UserWithRolesDTO> page = new Page<>(current, size);
-        List<UserWithRolesDTO> users = userService.selectAllUsersWithRoles(page);
-        return ApiResponse.ok(users);
+        Page<UserWithRolesDTO> users = userService.selectAllUsersWithRoles(page);
+        return ApiResponse.ok(ResultUtil.getResultFromPage(users));
     }
 }
