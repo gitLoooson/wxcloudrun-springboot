@@ -25,7 +25,7 @@ public class AuthController {
             String token = userService.loginOrRegister(loginRequest.getCode(), loginRequest.getUsername(), loginRequest.getAvatar());
             Map<String, Object> result = new HashMap<>();
             result.put("token", token);
-            result.put("user", userService.getUserByOpenId(RequestAttr.OPEN_ID.get(request)));
+            result.put("user", userService.getUserByOpenId(loginRequest.getCode()));
             return ApiResponse.ok(result);
         } catch (Exception e) {
             return ApiResponse.error(e.getMessage());
