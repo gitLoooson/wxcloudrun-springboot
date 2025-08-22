@@ -4,7 +4,7 @@ import lombok.Data;
 
 // 定义 DTO 类
 @Data
-public class LoginRequest {
+public class LoginRequestDTO {
     private String code;
     private String username;
     private String avatar;

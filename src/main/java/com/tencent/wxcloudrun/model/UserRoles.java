@@ -6,9 +6,9 @@ import java.io.Serializable;
 import java.util.Date;
 @Data
 public class UserRoles implements Serializable {
-    private Integer userId;
+    private Long userId;
 
-    private Integer roleId;
+    private Long roleId;
 
     private Date createdAt;
 }

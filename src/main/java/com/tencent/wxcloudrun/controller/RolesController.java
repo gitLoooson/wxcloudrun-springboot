@@ -6,6 +6,7 @@ import com.tencent.wxcloudrun.anno.RequestAttr;
 import com.tencent.wxcloudrun.anno.roles.RequiresRoles;
 import com.tencent.wxcloudrun.anno.roles.RoleEnum;
 import com.tencent.wxcloudrun.config.ApiResponse;
+import com.tencent.wxcloudrun.dto.UpdateUserRolesRequestDTO;
 import com.tencent.wxcloudrun.dto.UserWithRolesDTO;
 import com.tencent.wxcloudrun.service.impl.RolesService;
 import com.tencent.wxcloudrun.service.impl.UserRolesService;
@@ -53,5 +54,13 @@ public class RolesController {
 //    @RequiresRoles({RoleEnum.ADMIN_COURT})
     public ApiResponse getAllRoles(){
         return ApiResponse.ok(rolesService.getAllRoles());
+    }
+
+    // 更新用户角色
+    @PostMapping("/updateUserRoles")
+    public ApiResponse updateUserRoles(
+            @RequestBody UpdateUserRolesRequestDTO request) {
+        userRolesService.updateUserRoles(request.getUserId(), request.getRoleIds());
+        return ApiResponse.ok("权限更新成功!");
     }
 }

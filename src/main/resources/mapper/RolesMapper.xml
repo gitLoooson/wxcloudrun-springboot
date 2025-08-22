@@ -98,4 +98,15 @@
       select *
       from roles
     </select>
+
+
+    <!-- 批量查询角色 -->
+    <select id="selectBatchIds" resultMap="BaseResultMap">
+        SELECT * FROM roles WHERE id IN
+        <foreach collection="roleIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        ORDER BY id
+    </select>
+
 </mapper>
