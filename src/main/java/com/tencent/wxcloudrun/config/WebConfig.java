@@ -20,17 +20,17 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         // 注册拦截器
-//        registry.addInterceptor(jwtInterceptor)
-//                .addPathPatterns("/**") // 拦截所有/api开头的请求
-//                .excludePathPatterns(
-//                        "/api/auth/login",  // 登录接口不拦截
-//                        "/api/auth/register", // 注册接口不拦截
-//                        "/swagger**/**",     // 放行swagger
-//                        "/webjars/**",       // 放行webjars
-//                        "/v2/api-docs",      // 放行api文档
-//                        "/doc.html",          // 放行swagger-ui
-//                        "/images/getAllImages" // 放行获取所有图片接口
-//                );
+        registry.addInterceptor(jwtInterceptor)
+                .addPathPatterns("/**") // 拦截所有/api开头的请求
+                .excludePathPatterns(
+                        "/api/auth/login",  // 登录接口不拦截
+                        "/api/auth/register", // 注册接口不拦截
+                        "/swagger**/**",     // 放行swagger
+                        "/webjars/**",       // 放行webjars
+                        "/v2/api-docs",      // 放行api文档
+                        "/doc.html",          // 放行swagger-ui
+                        "/images/getAllImages" // 放行获取所有图片接口
+                );
 
         registry.addInterceptor(roleInterceptor)
                 .addPathPatterns("/**") // 拦截所有路径
