@@ -1,0 +1,31 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tencent.wxcloudrun.dao.BookingMapper">
+
+    <select id="selectDailySchedule" resultType="com.tencent.wxcloudrun.model.BookingSchedule">
+        SELECT
+        t.start_time as startTime,
+        c.name as courtName,
+        CASE WHEN b.id IS NOT NULL THEN 'booked' ELSE 'free' END as status,
+        b.price,
+        u.username as bookedBy
+        FROM time_slot t
+        CROSS JOIN court c
+        LEFT JOIN booking b ON b.time_slot_id = t.id
+        AND b.court_id = c.id
+        AND b.date = #{date}
+        AND b.status = 'confirmed'
+        LEFT JOIN user u ON b.user_id = u.id
+        WHERE c.is_active = true
+        ORDER BY t.start_time, c.name
+    </select>
+
+    <select id="existsBooking" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM booking
+        WHERE date = #{date}
+        AND court_id = #{courtId}
+        AND time_slot_id = #{timeSlotId}
+        AND status = 'confirmed'
+    </select>
+
+</mapper>

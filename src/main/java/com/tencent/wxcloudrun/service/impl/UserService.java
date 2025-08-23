@@ -3,15 +3,20 @@ package com.tencent.wxcloudrun.service.impl;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.tencent.wxcloudrun.dao.UserMapper;
+import com.tencent.wxcloudrun.dao.UserRolesMapper;
 import com.tencent.wxcloudrun.dto.UserWithRolesDTO;
 import com.tencent.wxcloudrun.jwt.JwtUtil;
 import com.tencent.wxcloudrun.model.User;
+import com.tencent.wxcloudrun.model.UserRoles;
 import com.tencent.wxcloudrun.wx.WeChatUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.tencent.wxcloudrun.anno.roles.RoleEnum.USER_COURT;
 
 @Service
 public class UserService {
@@ -24,13 +29,18 @@ public class UserService {
     @Autowired
     private JwtUtil jwtUtil;
 
-    public Map<String, Object> loginOrRegister(String code, String username, String avatar) {
-        // 1. 获取微信openid
-        Map<String, String> wxResult = weChatUtil.getSessionKeyOrOpenId(code);
-        String openid = wxResult.get("openid");
+    @Autowired
+    private UserRolesMapper userRolesMapper;
 
-        if (openid == null || openid.isEmpty()) {
-            throw new RuntimeException("微信登录失败: " + wxResult.get("errmsg"));
+    @Transactional(rollbackFor = Exception.class)
+    public Map<String, Object> loginOrRegister(String openid,String code, String username, String avatar) {
+        // 1. 获取微信openid
+        if(null == openid){
+            Map<String, String> wxResult = weChatUtil.getSessionKeyOrOpenId(code);
+            openid = wxResult.get("openid");
+            if (openid == null || openid.isEmpty()) {
+                throw new RuntimeException("微信登录失败: " + wxResult.get("errmsg"));
+            }
         }
 
         // 2. 查询用户是否存在
@@ -42,7 +52,12 @@ public class UserService {
             user.setOpenid(openid);
             user.setUsername(username);
             user.setAvatar(avatar);
-            userMapper.insert(user);
+            int insert = userMapper.insert(user);
+
+            UserRoles userRoles = new UserRoles();
+            userRoles.setUserId(Long.getLong(String.valueOf(insert)));
+            userRoles.setRoleId(Long.getLong(USER_COURT.getId().toString()));
+            userRolesMapper.insert(userRoles);
         } else {
             // 4. 存在则更新用户信息(可选)
 //            user.setUsername(username);

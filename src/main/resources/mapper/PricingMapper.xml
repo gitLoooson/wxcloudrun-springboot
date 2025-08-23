@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tencent.wxcloudrun.dao.PricingMapper">
+
+    <!-- 价格策略相关操作 -->
+    <insert id="insertPricingPolicy" parameterType="com.tencent.wxcloudrun.model.PricingPolicy" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO pricing_policy (name, description, is_active, created_at, updated_at)
+        VALUES (#{name}, #{description}, #{isActive}, #{createdAt}, #{updatedAt})
+    </insert>
+
+    <update id="updatePricingPolicy" parameterType="com.tencent.wxcloudrun.model.PricingPolicy">
+        UPDATE pricing_policy
+        SET name = #{name},
+        description = #{description},
+        is_active = #{isActive},
+        updated_at = #{updatedAt}
+        WHERE id = #{id}
+    </update>
+
+    <select id="selectAllPricingPolicies" resultType="com.tencent.wxcloudrun.model.PricingPolicy">
+        SELECT * FROM pricing_policy ORDER BY created_at DESC
+    </select>
+
+    <!-- 价格详情相关操作 -->
+    <insert id="insertPricingDetail" parameterType="com.tencent.wxcloudrun.model.PricingDetail" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO pricing_detail (
+        policy_id, court_id, time_slot_id, period_type, day_type,
+        price, start_date, end_date, priority, created_at
+        ) VALUES (
+        #{policyId}, #{courtId}, #{timeSlotId}, #{periodType}, #{dayType},
+        #{price}, #{startDate}, #{endDate}, #{priority}, #{createdAt}
+        )
+    </insert>
+
+    <update id="updatePricingDetail" parameterType="com.tencent.wxcloudrun.model.PricingDetail">
+        UPDATE pricing_detail
+        SET policy_id = #{policyId},
+        court_id = #{courtId},
+        time_slot_id = #{timeSlotId},
+        period_type = #{periodType},
+        day_type = #{dayType},
+        price = #{price},
+        start_date = #{startDate},
+        end_date = #{endDate},
+        priority = #{priority}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deletePricingDetail">
+        DELETE FROM pricing_detail WHERE id = #{id}
+    </delete>
+
+    <select id="selectPricingDetailsByPolicy" resultType="com.tencent.wxcloudrun.model.PricingDetail">
+        SELECT pd.*,
+        c.name as court_name,
+        ts.start_time as start_time,
+        ts.end_time as end_time,
+        CONCAT(ts.start_time, '-', ts.end_time) as time_slot_range,
+        pp.name as policy_name
+        FROM pricing_detail pd
+        LEFT JOIN court c ON pd.court_id = c.id
+        LEFT JOIN time_slot ts ON pd.time_slot_id = ts.id
+        LEFT JOIN pricing_policy pp ON pd.policy_id = pp.id
+        WHERE pd.policy_id = #{policyId}
+        ORDER BY pd.priority ASC, pd.created_at DESC
+    </select>
+
+
+    <select id="selectActualPrice" resultType="java.math.BigDecimal">
+        SELECT COALESCE((
+        SELECT pd.price
+        FROM pricing_detail pd
+        JOIN pricing_policy pp ON pd.policy_id = pp.id
+        WHERE pp.is_active = true
+        AND #{date} BETWEEN pd.start_date AND pd.end_date
+        AND (pd.court_id IS NULL OR pd.court_id = #{courtId})
+        AND (pd.time_slot_id IS NULL OR pd.time_slot_id = #{timeSlotId})
+        AND (pd.period_type IS NULL OR pd.period_type = #{periodType})
+        AND (pd.day_type IS NULL OR pd.day_type = #{dayType})
+        ORDER BY
+        pd.priority ASC,
+        pd.court_id DESC NULLS LAST,
+        pd.time_slot_id DESC NULLS LAST,
+        pd.period_type DESC NULLS LAST,
+        pd.day_type DESC NULLS LAST
+        LIMIT 1
+        ), 50.00) as price
+    </select>
+
+    <select id="selectPricesByConditions" resultType="com.tencent.wxcloudrun.model.PricingDetail">
+        SELECT pd.*, c.name as court_name,
+        CONCAT(ts.start_time, '-', ts.end_time) as time_slot_range,
+        pp.name as policy_name
+        FROM pricing_detail pd
+        LEFT JOIN court c ON pd.court_id = c.id
+        LEFT JOIN time_slot ts ON pd.time_slot_id = ts.id
+        LEFT JOIN pricing_policy pp ON pd.policy_id = pp.id
+        WHERE 1=1
+        <if test="courtId != null">
+            AND (pd.court_id = #{courtId} OR pd.court_id IS NULL)
+        </if>
+        <if test="timeSlotId != null">
+            AND (pd.time_slot_id = #{timeSlotId} OR pd.time_slot_id IS NULL)
+        </if>
+        <if test="periodType != null">
+            AND (pd.period_type = #{periodType} OR pd.period_type IS NULL)
+        </if>
+        <if test="dayType != null">
+            AND (pd.day_type = #{dayType} OR pd.day_type IS NULL)
+        </if>
+        ORDER BY pd.priority ASC, pd.start_date DESC
+    </select>
+
+    <!-- PricingMapper.xml 中添加 -->
+    <select id="selectAllTimeSlotPrices" resultType="com.tencent.wxcloudrun.dto.TimeSlotPrice">
+        SELECT
+        ts.id as timeSlotId,
+        ts.start_time as startTime,
+        ts.end_time as endTime,
+        ts.period_type as periodType,
+        COALESCE((
+        SELECT pd.price
+        FROM pricing_detail pd
+        JOIN pricing_policy pp ON pd.policy_id = pp.id
+        WHERE pp.is_active = true
+        AND #{date} BETWEEN pd.start_date AND pd.end_date
+        AND (pd.court_id IS NULL OR pd.court_id = #{courtId})
+        AND (pd.time_slot_id IS NULL OR pd.time_slot_id = ts.id)
+        AND (pd.period_type IS NULL OR pd.period_type = ts.period_type)
+        AND (pd.day_type IS NULL OR pd.day_type =
+        CASE
+        WHEN DAYOFWEEK(#{date}) IN (1,7) THEN 'weekend'
+        ELSE 'weekday'
+        END)
+        ORDER BY
+        pd.priority ASC,
+        pd.court_id DESC NULLS LAST,
+        pd.time_slot_id DESC NULLS LAST,
+        pd.period_type DESC NULLS LAST,
+        pd.day_type DESC NULLS LAST
+        LIMIT 1
+        ), 50.00) as price,
+        CASE
+        WHEN DAYOFWEEK(#{date}) IN (1,7) THEN 'weekend'
+        ELSE 'weekday'
+        END as dayType,
+        #{courtId} as courtId,
+        c.name as courtName,
+        CASE
+        WHEN EXISTS (
+        SELECT 1 FROM booking b
+        WHERE b.date = #{date}
+        AND b.court_id = #{courtId}
+        AND b.time_slot_id = ts.id
+        AND b.status = 'confirmed'
+        ) THEN false
+        ELSE true
+        END as available
+        FROM time_slot ts
+        CROSS JOIN court c
+        WHERE c.id = #{courtId}
+        ORDER BY ts.start_time
+    </select>
+
+    <select id="selectTimeSlotPricesByCourt" resultType="com.tencent.wxcloudrun.dto.TimeSlotPrice">
+        SELECT
+        c.name as court_name,
+        ts.start_time,
+        ts.end_time,
+        ts.period_type,
+        CASE
+        WHEN DAYOFWEEK(#{date}) IN (1,7) THEN 'weekend'
+        ELSE 'weekday'
+        END as day_type,
+        -- 计算价格
+        COALESCE(
+        (
+        SELECT pd.price
+        FROM pricing_detail pd
+        JOIN pricing_policy pp ON pd.policy_id = pp.id
+        WHERE pp.is_active = true
+        AND #{date} BETWEEN pd.start_date AND pd.end_date
+        AND (pd.court_id IS NULL OR pd.court_id = c.id)
+        AND (pd.time_slot_id IS NULL OR pd.time_slot_id = ts.id)
+        AND (pd.period_type IS NULL OR pd.period_type = ts.period_type)
+        AND (pd.day_type IS NULL OR pd.day_type =
+        CASE
+        WHEN DAYOFWEEK(#{date}) IN (1,7) THEN 'weekend'
+        ELSE 'weekday'
+        END)
+        ORDER BY
+        pd.priority ASC,
+        CASE WHEN pd.court_id IS NULL THEN 1 ELSE 0 END ASC,
+        CASE WHEN pd.time_slot_id IS NULL THEN 1 ELSE 0 END ASC,
+        CASE WHEN pd.period_type IS NULL THEN 1 ELSE 0 END ASC,
+        CASE WHEN pd.day_type IS NULL THEN 1 ELSE 0 END ASC
+        LIMIT 1
+        ),
+        50.00  -- 默认价格
+        ) as price,
+        -- 检查是否可预订
+        CASE
+        WHEN EXISTS (
+        SELECT 1 FROM booking b
+        WHERE b.date = #{date}
+        AND b.court_id = c.id
+        AND b.time_slot_id = ts.id
+        AND b.status = 'confirmed'
+        ) THEN '已预订'
+        ELSE '空闲'
+        END as status
+        FROM time_slot ts, court c
+        where 1 = 1
+        <if test="courtId != null">
+            And c.id = #{courtId}
+        </if>
+        ORDER BY c.id, ts.start_time;
+    </select>
+
+    <!-- PricingMapper.xml 中添加 -->
+    <select id="selectAllTimeSlotPrices" resultType="com.tencent.wxcloudrun.dto.TimeSlotPrice">
+        SELECT
+        ts.id as timeSlotId,
+        ts.start_time as startTime,
+        ts.end_time as endTime,
+        ts.period_type as periodType,
+        COALESCE((
+        SELECT pd.price
+        FROM pricing_detail pd
+        JOIN pricing_policy pp ON pd.policy_id = pp.id
+        WHERE pp.is_active = true
+        AND #{date} BETWEEN pd.start_date AND pd.end_date
+        AND (pd.court_id IS NULL OR pd.court_id = #{courtId})
+        AND (pd.time_slot_id IS NULL OR pd.time_slot_id = ts.id)
+        AND (pd.period_type IS NULL OR pd.period_type = ts.period_type)
+        AND (pd.day_type IS NULL OR pd.day_type =
+        CASE
+        WHEN DAYOFWEEK(#{date}) IN (1,7) THEN 'weekend'
+        ELSE 'weekday'
+        END)
+        ORDER BY
+        pd.priority ASC,
+        pd.court_id DESC NULLS LAST,
+        pd.time_slot_id DESC NULLS LAST,
+        pd.period_type DESC NULLS LAST,
+        pd.day_type DESC NULLS LAST
+        LIMIT 1
+        ), 50.00) as price,
+        CASE
+        WHEN DAYOFWEEK(#{date}) IN (1,7) THEN 'weekend'
+        ELSE 'weekday'
+        END as dayType,
+        #{courtId} as courtId,
+        c.name as courtName,
+        CASE
+        WHEN EXISTS (
+        SELECT 1 FROM booking b
+        WHERE b.date = #{date}
+        AND b.court_id = #{courtId}
+        AND b.time_slot_id = ts.id
+        AND b.status = 'confirmed'
+        ) THEN false
+        ELSE true
+        END as available
+        FROM time_slot ts
+        CROSS JOIN court c
+        WHERE c.id = #{courtId}
+        ORDER BY ts.start_time
+    </select>
+
+    <select id="selectTimeSlotPricesByCourt" resultType="com.tencent.wxcloudrun.dto.TimeSlotPrice">
+        SELECT
+        ts.id as timeSlotId,
+        ts.start_time as startTime,
+        ts.end_time as endTime,
+        ts.period_type as periodType,
+        COALESCE((
+        SELECT pd.price
+        FROM pricing_detail pd
+        JOIN pricing_policy pp ON pd.policy_id = pp.id
+        WHERE pp.is_active = true
+        AND #{date} BETWEEN pd.start_date AND pd.end_date
+        AND (pd.court_id IS NULL OR pd.court_id = c.id)
+        AND (pd.time_slot_id IS NULL OR pd.time_slot_id = ts.id)
+        AND (pd.period_type IS NULL OR pd.period_type = ts.period_type)
+        AND (pd.day_type IS NULL OR pd.day_type =
+        CASE
+        WHEN DAYOFWEEK(#{date}) IN (1,7) THEN 'weekend'
+        ELSE 'weekday'
+        END)
+        ORDER BY
+        pd.priority ASC,
+        pd.court_id DESC NULLS LAST,
+        pd.time_slot_id DESC NULLS LAST,
+        pd.period_type DESC NULLS LAST,
+        pd.day_type DESC NULLS LAST
+        LIMIT 1
+        ), 50.00) as price,
+        CASE
+        WHEN DAYOFWEEK(#{date}) IN (1,7) THEN 'weekend'
+        ELSE 'weekday'
+        END as dayType,
+        c.id as courtId,
+        c.name as courtName,
+        CASE
+        WHEN EXISTS (
+        SELECT 1 FROM booking b
+        WHERE b.date = #{date}
+        AND b.court_id = c.id
+        AND b.time_slot_id = ts.id
+        AND b.status = 'confirmed'
+        ) THEN false
+        ELSE true
+        END as available
+        FROM time_slot ts
+        CROSS JOIN court c
+        WHERE c.is_active = true
+        ORDER BY c.name, ts.start_time
+    </select>
+</mapper>
