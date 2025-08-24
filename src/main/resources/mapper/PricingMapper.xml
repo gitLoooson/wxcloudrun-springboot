@@ -319,4 +319,19 @@
         WHERE c.is_active = true
         ORDER BY c.name, ts.start_time
     </select>
+
+    <!-- 正确的批量更新不同价格 -->
+    <update id="updateBatchPrices">
+        UPDATE pricing_detail
+        SET price = CASE
+        <foreach collection="list" item="item">
+            WHEN id = #{item.id} THEN #{item.price}
+        </foreach>
+        END,
+        update_time = NOW()
+        WHERE id IN
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+            #{item.id}
+        </foreach>
+    </update>
 </mapper>

@@ -1,14 +1,18 @@
 package com.tencent.wxcloudrun.controller;
 
+import com.tencent.wxcloudrun.anno.roles.RequiresRoles;
+import com.tencent.wxcloudrun.anno.roles.RoleEnum;
 import com.tencent.wxcloudrun.config.ApiResponse;
 import com.tencent.wxcloudrun.dto.BatchPriceRequest;
 import com.tencent.wxcloudrun.dto.PricingDetailRequest;
+import com.tencent.wxcloudrun.model.PricingDetail;
 import com.tencent.wxcloudrun.service.impl.PricingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/pricing")
@@ -50,7 +54,8 @@ public class PricingController {
         return ApiResponse.ok("周末价格设置成功");
     }
 
-    @GetMapping
+    @GetMapping("/getPrices")
+    @RequiresRoles({RoleEnum.ADMIN_COURT})
     public ApiResponse getPrices(
             @RequestParam(required = false) Long courtId,
             @RequestParam(required = false) Long timeSlotId,
@@ -63,6 +68,12 @@ public class PricingController {
     public ApiResponse getFormattedTimeSlotPrices(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         return ApiResponse.ok(pricingService.getFormattedTimeSlotPrices(date));
+    }
+
+    @PostMapping("/setPrices")
+    @RequiresRoles({RoleEnum.ADMIN_COURT})
+    public ApiResponse setPrices(@RequestBody List<PricingDetail> details) {
+        return ApiResponse.ok(pricingService.setPrices(details));
     }
 }
 

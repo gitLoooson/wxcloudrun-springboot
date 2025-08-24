@@ -90,4 +90,8 @@ public class PricingService {
                .collect(Collectors.groupingBy(TimeSlotPrice::getCourtId))
                .values());
     }
+
+    public int setPrices(List<PricingDetail> details){
+        return pricingMapper.updateBatchPrices(details);
+    }
 }

@@ -39,4 +39,6 @@ public interface PricingMapper {
     // 获取指定日期指定球场所有时间段的价格
     List<TimeSlotPrice> selectTimeSlotPricesByCourt(@Param("date") LocalDate date,
                                                     @Param("courtId") Long courtId);
+
+    int updateBatchPrices(List<PricingDetail> list);
 }
