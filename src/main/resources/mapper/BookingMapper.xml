@@ -1,31 +1,54 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.tencent.wxcloudrun.dao.BookingMapper">
 
-    <select id="selectDailySchedule" resultType="com.tencent.wxcloudrun.model.BookingSchedule">
-        SELECT
-        t.start_time as startTime,
-        c.name as courtName,
-        CASE WHEN b.id IS NOT NULL THEN 'booked' ELSE 'free' END as status,
-        b.price,
-        u.username as bookedBy
-        FROM time_slot t
-        CROSS JOIN court c
-        LEFT JOIN booking b ON b.time_slot_id = t.id
-        AND b.court_id = c.id
-        AND b.date = #{date}
-        AND b.status = 'confirmed'
-        LEFT JOIN user u ON b.user_id = u.id
-        WHERE c.is_active = true
-        ORDER BY t.start_time, c.name
+    <!-- BookingMapper.xml 中添加 -->
+    <insert id="insertBatchBookings" parameterType="java.util.List">
+        INSERT INTO booking (court_id, time_slot_id, date, user_id, price, status, created_at, updated_at)
+        VALUES
+        <foreach collection="bookings" item="booking" separator=",">
+            (
+            #{booking.courtId},
+            #{booking.timeSlotId},
+            #{booking.date},
+            #{booking.userId},
+            #{booking.price},
+            #{booking.status},
+            #{booking.createdAt},
+            #{booking.updatedAt}
+            )
+        </foreach>
+    </insert>
+
+    <select id="selectBookingsByOrder" resultType="com.tencent.wxcloudrun.model.Booking">
+        SELECT b.*, c.name as court_name, ts.start_time, ts.end_time
+        FROM booking b
+        JOIN court c ON b.court_id = c.id
+        JOIN time_slot ts ON b.time_slot_id = ts.id
+        WHERE b.order_id = #{orderId}
+        ORDER BY b.date, ts.start_time
     </select>
 
-    <select id="existsBooking" resultType="boolean">
-        SELECT COUNT(*) > 0
-        FROM booking
-        WHERE date = #{date}
-        AND court_id = #{courtId}
-        AND time_slot_id = #{timeSlotId}
-        AND status = 'confirmed'
+    <update id="cancelBatchBookings">
+        UPDATE booking
+        SET status = #{status},
+        updated_at = NOW()
+        WHERE id IN
+        <foreach collection="bookingIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        AND status = 'confirmed'  -- 只取消已确认的预订
+    </update>
+
+    <select id="selectBookingIdsByOrder" resultType="java.lang.Long">
+        SELECT id FROM booking WHERE order_id = #{orderId} AND status = 'confirmed'
     </select>
+
+    <update id="cancelBookingsByOrder">
+        UPDATE booking
+        SET status = #{status},
+        updated_at = NOW()
+        WHERE order_id = #{orderId}
+        AND status = 'confirmed'  -- 只取消已确认的预订
+    </update>
 
 </mapper>

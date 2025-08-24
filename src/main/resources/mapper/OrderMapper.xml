@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tencent.wxcloudrun.dao.OrderMapper">
+
+    <insert id="insertOrder" parameterType="com.tencent.wxcloudrun.model.Order" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `order` (order_number, user_id, total_amount, status,
+        create_time, update_time, cancel_reason, cancelled_time)
+        VALUES (#{orderNumber}, #{userId}, #{totalAmount}, #{status},
+        #{createTime}, #{updateTime}, #{cancelReason}, #{cancelledTime})
+    </insert>
+
+    <update id="updateOrderStatus">
+        UPDATE `order`
+        SET status = #{status},
+        update_time = NOW(),
+        <if test="cancelReason != null">
+            cancel_reason = #{cancelReason},
+            cancelled_time = NOW(),
+        </if>
+        <if test="status == 'completed'">
+            update_time = NOW()
+        </if>
+        WHERE id = #{id}
+    </update>
+
+    <select id="selectOrderById" resultType="com.tencent.wxcloudrun.model.Order">
+        SELECT o.*, u.username
+        FROM `order` o
+        LEFT JOIN user u ON o.user_id = u.id
+        WHERE o.id = #{id}
+    </select>
+
+    <select id="selectOrderByNumber" resultType="com.tencent.wxcloudrun.model.Order">
+        SELECT o.*, u.username
+        FROM `order` o
+        LEFT JOIN user u ON o.user_id = u.id
+        WHERE o.order_number = #{orderNumber}
+    </select>
+
+    <select id="selectOrdersByStatus" resultType="com.tencent.wxcloudrun.model.Order">
+        SELECT o.*, u.username
+        FROM `order` o
+        LEFT JOIN user u ON o.user_id = u.id
+        WHERE o.status = #{status}
+    </select>
+
+    <select id="selectOrdersByUser" resultType="com.tencent.wxcloudrun.model.Order">
+        SELECT o.*, u.username
+        FROM `order` o
+        LEFT JOIN user u ON o.user_id = u.id
+        WHERE u.id = #{userId}
+    </select>
+
+    <update id="updateOrderAmount">
+        UPDATE `order`
+        SET total_amount = #{totalAmount},
+        update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateBookingsOrderId">
+        UPDATE booking
+        SET order_id = #{orderId},
+        updated_at = NOW()
+        WHERE id IN
+        <foreach collection="bookingIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <select id="getAllOrders" resultType="com.tencent.wxcloudrun.model.Order">
+        SELECT o.*
+        FROM `order` o
+    </select>
+
+</mapper>

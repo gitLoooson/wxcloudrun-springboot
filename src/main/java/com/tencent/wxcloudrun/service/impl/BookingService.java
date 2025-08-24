@@ -1,50 +1,154 @@
 package com.tencent.wxcloudrun.service.impl;
 
 import com.tencent.wxcloudrun.dao.BookingMapper;
-import com.tencent.wxcloudrun.dto.BookingResult;
+import com.tencent.wxcloudrun.dao.OrderMapper;
+import com.tencent.wxcloudrun.dto.BatchBookingResult;
+import com.tencent.wxcloudrun.dto.BookingRequest;
+import com.tencent.wxcloudrun.dto.TimeSlotPrice;
+import com.tencent.wxcloudrun.enums.OrderStatus;
 import com.tencent.wxcloudrun.model.Booking;
-import com.tencent.wxcloudrun.model.BookingSchedule;
+import com.tencent.wxcloudrun.model.Order;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(rollbackFor = Exception.class)
 public class BookingService {
     private final BookingMapper bookingMapper;
     private final PricingService pricingService;
+    private final OrderMapper orderMapper;
 
-    public BookingResult createBooking(Long userId, LocalDate date, Long courtId, Long timeSlotId) {
-        if (bookingMapper.existsBooking(date, courtId, timeSlotId)) {
-            return BookingResult.error("该时间段已被预订");
+    /**
+     * 原子性批量预订 - 任何一个失败就全部回滚
+     */
+    private BatchBookingResult createAtomicBatchBookings(Long userId, List<BookingRequest> bookingRequests) {
+        BatchBookingResult result = new BatchBookingResult();
+        List<Booking> bookingsToInsert = new ArrayList<>();
+
+        List<TimeSlotPrice> timeSlotPricesByCourt = pricingService.getTimeSlotPricesByCourt(bookingRequests.get(0).getDate(), bookingRequests.get(0).getCourtId());
+
+        // 1. 预先计算所有价格和创建预订对象
+        for (BookingRequest request : bookingRequests) {
+            Optional<TimeSlotPrice> firstMatching = timeSlotPricesByCourt.stream().findFirst().filter(timeSlotPrices -> timeSlotPrices.getTimeSlotId().equals(request.getTimeSlotId()));
+            if(firstMatching.isPresent()) {
+                Booking booking = new Booking();
+                booking.setCourtId(request.getCourtId());
+                booking.setTimeSlotId(request.getTimeSlotId());
+                booking.setDate(request.getDate());
+                booking.setUserId(userId);
+                booking.setPrice(firstMatching.get().getPrice());
+                booking.setStatus("confirmed");
+                booking.setCreatedAt(LocalDateTime.now());
+                booking.setUpdatedAt(LocalDateTime.now());
+                bookingsToInsert.add(booking);
+            }else{
+                throw new RuntimeException("请联系管理员!时间段" + request.getTimeSlotId() +"未设置价格!");
+            }
         }
 
-        BigDecimal price = pricingService.getActualPrice(date, courtId, timeSlotId);
+        // 2. 批量插入（如果任何一条失败，整个事务回滚）
+        try {
+            int successCount = bookingMapper.insertBatchBookings(bookingsToInsert);
 
-        Booking booking = new Booking();
-        booking.setCourtId(courtId);
-        booking.setTimeSlotId(timeSlotId);
-        booking.setDate(date);
-        booking.setUserId(userId);
-        booking.setPrice(price);
-        booking.setStatus("confirmed");
+            result.setSuccessCount(successCount);
+            result.setSuccessfulBookings(bookingsToInsert);
+            result.setTotalRequests(bookingRequests.size());
 
-        int result = bookingMapper.insertBooking(booking);
-        return result > 0 ? BookingResult.success("预订成功", booking) : BookingResult.error("预订失败");
+        } catch (DuplicateKeyException e) {
+            // 唯一键冲突，事务会自动回滚
+            throw new RuntimeException("预订冲突：存在重复的时间段", e);
+        } catch (Exception e) {
+            // 其他异常，事务会自动回滚
+            throw new RuntimeException("批量预订失败: " + e.getMessage(), e);
+        }
+
+        return result;
     }
 
-    public boolean cancelBooking(Long bookingId) {
-        return bookingMapper.updateBookingStatus(bookingId, "cancelled") > 0;
+    /**
+     * 创建带订单的原子性批量预订
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public Order createOrderWithAtomicBookings(Long userId, List<BookingRequest> bookingRequests) {
+        // 1. 生成订单号
+        String orderNumber = generateOrderNumber();
+
+        // 2. 创建预订（原子性操作）
+        BatchBookingResult bookingResult = createAtomicBatchBookings(userId, bookingRequests);
+
+        if (bookingResult.getSuccessfulBookings().isEmpty()) {
+            throw new RuntimeException("预订冲突：存在已选择的时间段!");
+        }
+
+        // 3. 计算订单总金额
+        BigDecimal totalAmount = bookingResult.getSuccessfulBookings().stream()
+                .map(Booking::getPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        // 4. 创建订单
+        Order order = new Order();
+        order.setOrderNumber(orderNumber);
+        order.setUserId(userId);
+        order.setTotalAmount(totalAmount);
+        order.setStatus(OrderStatus.PENDING.getCode());
+        order.setCreateTime(LocalDateTime.now());
+        order.setUpdateTime(LocalDateTime.now());
+
+        orderMapper.insertOrder(order);
+
+        // 5. 更新预订的订单ID
+        List<Long> bookingIds = bookingResult.getSuccessfulBookings().stream()
+                .map(Booking::getId)
+                .collect(Collectors.toList());
+
+        orderMapper.updateBookingsOrderId(order.getId(), bookingIds);
+
+        return order;
     }
 
-    public List<BookingSchedule> getDailySchedule(LocalDate date) {
-        return bookingMapper.selectDailySchedule(date);
+    private String generateOrderNumber() {
+        return "ORD" + System.currentTimeMillis() +
+                String.format("%04d", (int)(Math.random() * 10000));
     }
 
-    public List<Booking> getUserBookings(Long userId) {
-        return bookingMapper.selectBookingsByUser(userId);
+
+    /**
+     * 根据订单ID取消所有关联预订
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public boolean cancelBookingsByOrder(Long orderId) {
+        try {
+            // 先获取预订ID列表
+            List<Long> bookingIds = bookingMapper.selectBookingIdsByOrder(orderId);
+
+            if (bookingIds.isEmpty()) {
+                return true; // 没有预订需要取消
+            }
+
+            // 批量取消预订
+            int affectedRows = bookingMapper.cancelBatchBookings(bookingIds, "cancelled");
+            return affectedRows == bookingIds.size();
+        } catch (Exception e) {
+            throw new RuntimeException("取消订单预订失败: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 根据订单查询所有的预定
+     * @param orderId
+     * @return
+     */
+    public List<Booking> selectBookingsByOrder(Long orderId) {
+        return bookingMapper.selectBookingsByOrder(orderId);
     }
 }

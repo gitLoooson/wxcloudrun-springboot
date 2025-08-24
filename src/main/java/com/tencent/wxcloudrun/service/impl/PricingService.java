@@ -11,8 +11,8 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 // PricingService.java
@@ -77,25 +77,17 @@ public class PricingService {
         return pricingMapper.selectPricesByConditions(courtId, timeSlotId, periodType, dayType);
     }
 
-    // PricingService.java 中添加
-    public List<TimeSlotPrice> getAllTimeSlotPrices(LocalDate date, Long courtId) {
-        return pricingMapper.selectAllTimeSlotPrices(date, courtId);
-    }
-
-    public List<TimeSlotPrice> getTimeSlotPricesByCourt(LocalDate date) {
-        return pricingMapper.selectTimeSlotPricesByCourt(date, null);
-    }
-
-    public List<TimeSlotPrice> getTimeSlotPricesByCourt(LocalDate date, Long courtId) {
+    public List<TimeSlotPrice> getTimeSlotPricesByCourt(LocalDate date,Long courtId) {
         return pricingMapper.selectTimeSlotPricesByCourt(date, courtId);
     }
 
     // 获取格式化后的价格信息（便于前端显示）
-    public Map<String, List<TimeSlotPrice>> getFormattedTimeSlotPrices(LocalDate date) {
-        List<TimeSlotPrice> allPrices = getTimeSlotPricesByCourt(date);
+    public List<List<TimeSlotPrice>> getFormattedTimeSlotPrices(LocalDate date) {
+        List<TimeSlotPrice> allPrices = getTimeSlotPricesByCourt(date,null);
 
         // 按球场分组
-        return allPrices.stream()
-                .collect(Collectors.groupingBy(TimeSlotPrice::getCourtName));
+       return new ArrayList<>(allPrices.stream()
+               .collect(Collectors.groupingBy(TimeSlotPrice::getCourtId))
+               .values());
     }
 }

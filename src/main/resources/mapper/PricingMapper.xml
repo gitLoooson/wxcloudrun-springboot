@@ -164,7 +164,9 @@
 
     <select id="selectTimeSlotPricesByCourt" resultType="com.tencent.wxcloudrun.dto.TimeSlotPrice">
         SELECT
+        c.id as court_id,
         c.name as court_name,
+        ts.id time_slot_id,
         ts.start_time,
         ts.end_time,
         ts.period_type,
