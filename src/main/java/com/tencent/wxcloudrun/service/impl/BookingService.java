@@ -17,6 +17,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -144,6 +145,10 @@ public class BookingService {
             Order order = orderMapper.selectOrderById(orderId);
             if (order == null) {
                 throw new RuntimeException("订单不存在");
+            }
+            Map<String, Boolean> stringObjectMap = orderMapper.checkOrderCancelable(orderId);
+            if(!stringObjectMap.get("cancelStatus")){
+                throw new RuntimeException("订单与预定时间不足24小时，不能取消!");
             }
             // 3. 执行退款
             boolean refundSuccess = userAccountService.refund(

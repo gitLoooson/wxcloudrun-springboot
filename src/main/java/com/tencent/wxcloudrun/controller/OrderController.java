@@ -13,6 +13,17 @@ import org.springframework.web.bind.annotation.*;
 public class OrderController {
     private final OrderService orderService;
 
+    @PostMapping("/{orderId}/adminCancel")
+    public ApiResponse adminCancelOrder(
+            @PathVariable Long orderId,
+            @RequestParam(required = false) String cancelReason) {
+
+        boolean success = orderService.cancelOrder(orderId, cancelReason);
+        return success ?
+                ApiResponse.ok() :
+                ApiResponse.error("订单取消失败!");
+    }
+
     @PostMapping("/{orderId}/cancel")
     public ApiResponse cancelOrder(
             @PathVariable Long orderId,

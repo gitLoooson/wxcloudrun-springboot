@@ -73,4 +73,17 @@
         FROM `order` o
     </select>
 
+    <select id="checkOrderCancelable" resultType="java.util.HashMap">
+        SELECT COALESCE(
+                       (SELECT
+                            o.status = 'confirmed'
+                                AND MIN(CONCAT(b.date, ' ', ts.start_time)) > DATE_ADD(NOW(), INTERVAL 24 HOUR)
+                        FROM `order` o
+                                 INNER JOIN booking b ON o.id = b.order_id
+                                 INNER JOIN time_slot ts ON b.time_slot_id = ts.id
+                        WHERE o.id = 1
+                        GROUP BY o.id),
+                       true
+               ) cancelStatus
+    </select>
 </mapper>

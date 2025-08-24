@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Param;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 public interface OrderMapper {
@@ -26,4 +27,9 @@ public interface OrderMapper {
                               @Param("bookingIds") List<Long> bookingIds);
 
     List<Order> getAllOrders();
+
+    /**
+     * 检查订单是否可以取消（返回详细信息）
+     */
+    Map<String, Boolean> checkOrderCancelable(@Param("orderId") Long orderId);
 }
