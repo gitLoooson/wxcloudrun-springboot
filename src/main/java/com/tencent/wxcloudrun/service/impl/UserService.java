@@ -2,11 +2,13 @@ package com.tencent.wxcloudrun.service.impl;
 
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.tencent.wxcloudrun.dao.UserAccountMapper;
 import com.tencent.wxcloudrun.dao.UserMapper;
 import com.tencent.wxcloudrun.dao.UserRolesMapper;
 import com.tencent.wxcloudrun.dto.UserWithRolesDTO;
 import com.tencent.wxcloudrun.jwt.JwtUtil;
 import com.tencent.wxcloudrun.model.User;
+import com.tencent.wxcloudrun.model.UserAccount;
 import com.tencent.wxcloudrun.model.UserRoles;
 import com.tencent.wxcloudrun.wx.WeChatUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +33,9 @@ public class UserService {
 
     @Autowired
     private UserRolesMapper userRolesMapper;
+
+    @Autowired
+    private UserAccountMapper userAccountMapper;
 
     @Transactional(rollbackFor = Exception.class)
     public Map<String, Object> loginOrRegister(String openid,String code, String username, String avatar) {
@@ -58,6 +63,10 @@ public class UserService {
             userRoles.setUserId(Long.getLong(String.valueOf(insert)));
             userRoles.setRoleId(Long.getLong(USER_COURT.getId().toString()));
             userRolesMapper.insert(userRoles);
+
+            UserAccount userAccount = new UserAccount();
+            userAccount.setUserId(Long.getLong(String.valueOf(insert)));
+            userAccountMapper.insertUserAccount(userAccount);
         } else {
             // 4. 存在则更新用户信息(可选)
 //            user.setUsername(username);

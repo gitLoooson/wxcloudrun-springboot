@@ -27,6 +27,7 @@ public class BookingService {
     private final BookingMapper bookingMapper;
     private final PricingService pricingService;
     private final OrderMapper orderMapper;
+    private final UserAccountService userAccountService;
 
     /**
      * 原子性批量预订 - 任何一个失败就全部回滚
@@ -113,6 +114,18 @@ public class BookingService {
 
         orderMapper.updateBookingsOrderId(order.getId(), bookingIds);
 
+        // 扣款支付
+        boolean paymentSuccess = userAccountService.consume(
+                userId,
+                order.getTotalAmount(),
+                order.getId(),
+                "支付订单：" + order.getOrderNumber()
+        );
+
+        if (paymentSuccess) {
+            // 更新订单状态为已确认
+            orderMapper.updateOrderStatus(order.getId(), OrderStatus.CONFIRMED.getCode(), null);
+        }
         return order;
     }
 
@@ -126,18 +139,21 @@ public class BookingService {
      * 根据订单ID取消所有关联预订
      */
     @Transactional(rollbackFor = Exception.class)
-    public boolean cancelBookingsByOrder(Long orderId) {
+    public void cancelBookingsByOrder(Long orderId,String cancelReason) {
         try {
-            // 先获取预订ID列表
-            List<Long> bookingIds = bookingMapper.selectBookingIdsByOrder(orderId);
-
-            if (bookingIds.isEmpty()) {
-                return true; // 没有预订需要取消
+            Order order = orderMapper.selectOrderById(orderId);
+            if (order == null) {
+                throw new RuntimeException("订单不存在");
             }
-
+            // 3. 执行退款
+            boolean refundSuccess = userAccountService.refund(
+                    order.getUserId(),
+                    order.getTotalAmount(),
+                    orderId,
+                    "订单取消退款：" + (cancelReason != null ? cancelReason : "用户取消")
+            );
             // 批量取消预订
-            int affectedRows = bookingMapper.cancelBatchBookings(bookingIds, "cancelled");
-            return affectedRows == bookingIds.size();
+            int affectedRows = bookingMapper.cancelBookingsByOrder(orderId, "cancelled");
         } catch (Exception e) {
             throw new RuntimeException("取消订单预订失败: " + e.getMessage(), e);
         }

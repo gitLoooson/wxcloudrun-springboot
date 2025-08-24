@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tencent.wxcloudrun.dao.UserAccountMapper">
+
+    <insert id="insertUserAccount" parameterType="com.tencent.wxcloudrun.model.UserAccount" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO user_account (user_id, balance, total_recharge, total_consumption, create_time, update_time)
+        VALUES (#{userId}, #{balance}, #{totalRecharge}, #{totalConsumption}, #{createTime}, #{updateTime})
+    </insert>
+
+    <update id="updateUserAccount" parameterType="com.tencent.wxcloudrun.model.UserAccount">
+        UPDATE user_account
+        SET balance = #{balance},
+        total_recharge = #{totalRecharge},
+        total_consumption = #{totalConsumption},
+        update_time = #{updateTime}
+        WHERE id = #{id}
+    </update>
+
+    <select id="selectUserAccountByUserId" resultType="com.tencent.wxcloudrun.model.UserAccount">
+        SELECT ua.*, u.username
+        FROM user_account ua
+        LEFT JOIN user u ON ua.user_id = u.id
+        WHERE ua.user_id = #{userId}
+    </select>
+
+    <update id="updateBalance">
+        UPDATE user_account
+        SET balance = balance + #{amount},
+        <choose>
+            <when test="type == 'recharge'">
+                total_recharge = total_recharge + #{amount},
+            </when>
+            <when test="type == 'consumption'">
+                total_consumption = total_consumption + ABS(#{amount}),
+            </when>
+        </choose>
+        update_time = NOW()
+        WHERE user_id = #{userId}
+        <if test="amount.compareTo(java.math.BigDecimal.ZERO) &lt; 0">
+            AND balance + #{amount} >= 0  <!-- 扣款时检查余额是否充足 -->
+        </if>
+    </update>
+
+    <update id="batchUpdateBalance" parameterType="java.util.List">
+        <foreach collection="updates" item="update" separator=";">
+            UPDATE user_account
+            SET balance = balance + #{update.amount},
+            <choose>
+                <when test="update.type == 'recharge'">
+                    total_recharge = total_recharge + #{update.amount},
+                </when>
+                <when test="update.type == 'consumption'">
+                    total_consumption = total_consumption + ABS(#{update.amount}),
+                </when>
+            </choose>
+            update_time = NOW()
+            WHERE user_id = #{update.userId}
+            <if test="update.amount.compareTo(java.math.BigDecimal.ZERO) &lt; 0">
+                AND balance + #{update.amount} >= 0
+            </if>
+        </foreach>
+    </update>
+
+    <!-- 获取用户账户列表 -->
+    <select id="selectUserAccounts" resultType="com.tencent.wxcloudrun.model.UserAccount">
+        SELECT ua.*, u.username
+        FROM user_account ua
+                 LEFT JOIN user u ON ua.user_id = u.id
+        ORDER BY ua.update_time DESC
+    </select>
+
+    <!-- 根据余额范围查询用户账户 -->
+    <select id="selectAccountsByBalanceRange" resultType="com.tencent.wxcloudrun.model.UserAccount">
+        SELECT ua.*, u.username
+        FROM user_account ua
+        LEFT JOIN user u ON ua.user_id = u.id
+        WHERE ua.balance BETWEEN #{minBalance} AND #{maxBalance}
+        ORDER BY ua.balance DESC
+    </select>
+
+    <!-- 更新累计消费金额 -->
+    <update id="updateTotalConsumption">
+        UPDATE user_account
+        SET total_consumption = total_consumption + #{amount},
+        update_time = NOW()
+        WHERE user_id = #{userId}
+    </update>
+
+    <!-- 更新累计充值金额 -->
+    <update id="updateTotalRecharge">
+        UPDATE user_account
+        SET total_recharge = total_recharge + #{amount},
+        update_time = NOW()
+        WHERE user_id = #{userId}
+    </update>
+
+    <!-- 检查用户账户是否存在 -->
+    <select id="existsByUserId" resultType="boolean">
+        SELECT COUNT(*) > 0 FROM user_account WHERE user_id = #{userId}
+    </select>
+
+    <!-- 获取用户余额 -->
+    <select id="selectBalanceByUserId" resultType="java.math.BigDecimal">
+        SELECT balance FROM user_account WHERE user_id = #{userId}
+    </select>
+
+    <!-- 批量获取用户余额 -->
+    <select id="selectBalancesByUserIds" resultType="map">
+        SELECT user_id, balance
+        FROM user_account
+        WHERE user_id IN
+        <foreach collection="userIds" item="userId" open="(" separator="," close=")">
+            #{userId}
+        </foreach>
+    </select>
+
+</mapper>

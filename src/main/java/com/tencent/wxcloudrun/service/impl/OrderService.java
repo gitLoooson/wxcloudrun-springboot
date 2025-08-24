@@ -22,7 +22,7 @@ public class OrderService {
      */
     public boolean cancelOrder(Long orderId, String cancelReason) {
         // 1. 取消所有关联预订
-        bookingService.cancelBookingsByOrder(orderId);
+        bookingService.cancelBookingsByOrder(orderId,cancelReason);
 
         // 2. 更新订单状态为已取消
         return orderMapper.updateOrderStatus(orderId, OrderStatus.CANCELLED.getCode(), cancelReason) > 0;
