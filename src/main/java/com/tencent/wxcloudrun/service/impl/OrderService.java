@@ -21,9 +21,9 @@ public class OrderService {
     /**
      * 取消订单（同时取消所有关联预订）
      */
-    public boolean cancelOrder(Long orderId, String cancelReason) {
+    public boolean cancelOrder(Long orderId, String cancelReason,Long userId) {
         // 1. 取消所有关联预订
-        bookingService.cancelBookingsByOrder(orderId,cancelReason);
+        bookingService.cancelBookingsByOrder(orderId,cancelReason,userId);
 
         // 2. 更新订单状态为已取消
         return orderMapper.updateOrderStatus(orderId, OrderStatus.CANCELLED.getCode(), cancelReason) > 0;

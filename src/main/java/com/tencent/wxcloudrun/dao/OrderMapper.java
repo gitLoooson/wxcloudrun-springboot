@@ -32,5 +32,5 @@ public interface OrderMapper {
     /**
      * 检查订单是否可以取消（返回详细信息）
      */
-    Map<String, Boolean> checkOrderCancelable(@Param("orderId") Long orderId);
+    Map<String, Long> checkOrderCancelable(@Param("orderId") Long orderId);
 }

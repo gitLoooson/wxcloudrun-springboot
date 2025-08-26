@@ -15,10 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -138,14 +135,23 @@ public class BookingService {
      * 根据订单ID取消所有关联预订
      */
     @Transactional(rollbackFor = Exception.class)
-    public void cancelBookingsByOrder(Long orderId,String cancelReason) {
+    public void cancelBookingsByOrder(Long orderId,String cancelReason,Long userId) {
         try {
             Order order = orderMapper.selectOrderById(orderId);
             if (order == null) {
-                throw new RuntimeException("订单不存在");
+                throw new RuntimeException("订单不存在!");
             }
-            Map<String, Boolean> stringObjectMap = orderMapper.checkOrderCancelable(orderId);
-            if(!stringObjectMap.get("cancelStatus")){
+
+            if (userId !=null && !order.getUserId().toString().equals(userId.toString())) {
+                throw new RuntimeException("没有权限取消该订单!");
+            }
+
+            if(Objects.equals(order.getStatus(), OrderStatus.CANCELLED.getCode()) || Objects.equals(order.getStatus(), OrderStatus.COMPLETED.getCode()) ) {
+                throw new RuntimeException("订单已经取消或者已完成，不能取消!");
+            }
+
+            Map<String, Long> stringObjectMap = orderMapper.checkOrderCancelable(orderId);
+            if(!(stringObjectMap.get("cancelStatus") > 0)){
                 throw new RuntimeException("订单与预定时间不足24小时，不能取消!");
             }
             // 3. 执行退款

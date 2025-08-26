@@ -29,13 +29,13 @@
     <update id="updateOrderStatus">
         UPDATE `order`
         SET status = #{status},
-        update_time = NOW(),
+        update_time = NOW()
         <if test="cancelReason != null">
-            cancel_reason = #{cancelReason},
-            cancelled_time = NOW(),
+            ,cancel_reason = #{cancelReason}
+            ,cancelled_time = NOW()
         </if>
         <if test="status == 'completed'">
-            update_time = NOW()
+            ,update_time = NOW()
         </if>
         WHERE id = #{id}
     </update>

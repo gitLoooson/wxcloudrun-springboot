@@ -19,23 +19,20 @@ import javax.servlet.http.HttpServletRequest;
 public class OrderController {
     private final OrderService orderService;
 
-    @PostMapping("/{orderId}/adminCancel")
-    public ApiResponse adminCancelOrder(
-            @PathVariable Long orderId,
-            @RequestParam(required = false) String cancelReason) {
-
-        boolean success = orderService.cancelOrder(orderId, cancelReason);
+    @PostMapping("/cancel")
+    public ApiResponse cancelOrder(
+            @RequestBody Order order,HttpServletRequest request) {
+        boolean success = orderService.cancelOrder(order.getId(), order.getCancelReason() == null ? "用户手动取消!" : order.getCancelReason(),RequestAttr.USER_ID.get(request));
         return success ?
                 ApiResponse.ok() :
                 ApiResponse.error("订单取消失败!");
     }
 
-    @PostMapping("/{orderId}/cancel")
-    public ApiResponse cancelOrder(
-            @PathVariable Long orderId,
-            @RequestParam(required = false) String cancelReason) {
-
-        boolean success = orderService.cancelOrder(orderId, cancelReason);
+    @PostMapping("/cancelByAdmin")
+    @RequiresRoles({RoleEnum.ADMIN_COURT})
+    public ApiResponse cancelByAdmin(
+            @RequestBody Order order) {
+        boolean success = orderService.cancelOrder(order.getId(), order.getCancelReason() == null ? "管理员取消!" : order.getCancelReason(),null);
         return success ?
                 ApiResponse.ok() :
                 ApiResponse.error("订单取消失败!");

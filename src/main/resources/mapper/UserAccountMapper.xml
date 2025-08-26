@@ -36,7 +36,7 @@
         </choose>
         update_time = NOW()
         WHERE user_id = #{userId}
-        <if test="amount.compareTo(java.math.BigDecimal.ZERO) &lt; 0">
+        <if test="amount &lt; 0">
             AND balance + #{amount} >= 0  <!-- 扣款时检查余额是否充足 -->
         </if>
     </update>
