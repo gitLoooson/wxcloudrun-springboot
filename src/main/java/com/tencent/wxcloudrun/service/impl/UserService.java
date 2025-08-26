@@ -68,10 +68,10 @@ public class UserService {
             userAccount.setUserId(Long.getLong(String.valueOf(insert)));
             userAccountMapper.insertUserAccount(userAccount);
         } else {
-            // 4. 存在则更新用户信息(可选)
-//            user.setUsername(username);
-//            user.setAvatar(avatar);
-//            userMapper.update(user);
+//             4. 存在则更新用户信息(可选)
+            user.setUsername(username);
+            user.setAvatar(avatar);
+            userMapper.update(user);
         }
 
         // 5. 生成并返回token

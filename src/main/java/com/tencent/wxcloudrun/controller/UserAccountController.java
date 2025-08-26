@@ -1,6 +1,8 @@
 package com.tencent.wxcloudrun.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.tencent.wxcloudrun.anno.roles.RequiresRoles;
+import com.tencent.wxcloudrun.anno.roles.RoleEnum;
 import com.tencent.wxcloudrun.config.ApiResponse;
 import com.tencent.wxcloudrun.model.TransactionRecord;
 import com.tencent.wxcloudrun.model.UserAccount;
@@ -19,11 +21,8 @@ public class UserAccountController {
     private final UserAccountService userAccountService;
 
     @PostMapping("/recharge")
-    public ApiResponse recharge(
-            @RequestParam Long userId,
-            @RequestParam BigDecimal amount,
-            @RequestParam(required = false) String description) {
-
+    @RequiresRoles({RoleEnum.ADMIN_COURT})
+    public ApiResponse recharge(@RequestBody Long userId, BigDecimal amount, String description) {
         boolean success = userAccountService.recharge(userId, amount,
                 description != null ? description : "用户充值");
         return success ? ApiResponse.ok() : ApiResponse.error("充值失败");
