@@ -31,8 +31,8 @@ public class OrderController {
     @PostMapping("/cancelByAdmin")
     @RequiresRoles({RoleEnum.ADMIN_COURT})
     public ApiResponse cancelByAdmin(
-            @RequestBody Order order) {
-        boolean success = orderService.cancelOrder(order.getId(), order.getCancelReason() == null ? "管理员取消!" : order.getCancelReason(),null);
+            @RequestBody Order order,HttpServletRequest request) {
+        boolean success = orderService.cancelOrder(order.getId(), order.getCancelReason() == null ? RequestAttr.USER_ID.get(request) +"管理员取消!" : order.getCancelReason(),null);
         return success ?
                 ApiResponse.ok() :
                 ApiResponse.error("订单取消失败!");

@@ -150,10 +150,13 @@ public class BookingService {
                 throw new RuntimeException("订单已经取消或者已完成，不能取消!");
             }
 
-            Map<String, Long> stringObjectMap = orderMapper.checkOrderCancelable(orderId);
-            if(!(stringObjectMap.get("cancelStatus") > 0)){
-                throw new RuntimeException("订单与预定时间不足24小时，不能取消!");
+            if(userId!=null){
+                Map<String, Long> stringObjectMap = orderMapper.checkOrderCancelable(orderId);
+                if(!(stringObjectMap.get("cancelStatus") > 0)){
+                    throw new RuntimeException("订单与预定时间不足24小时，不能取消!");
+                }
             }
+
             // 3. 执行退款
             boolean refundSuccess = userAccountService.refund(
                     order.getUserId(),

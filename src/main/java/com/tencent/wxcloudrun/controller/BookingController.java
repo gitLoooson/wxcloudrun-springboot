@@ -24,8 +24,7 @@ public class BookingController {
             HttpServletRequest request,
             @RequestBody List<BookingRequest> bookingRequests
             ) {
-        for (int i = 0; i < bookingRequests.size(); i++) {
-            BookingRequest bookingRequest = bookingRequests.get(i);
+        for (BookingRequest bookingRequest : bookingRequests) {
             bookingRequest.setUserId(RequestAttr.USER_ID.get(request));
         }
         return ApiResponse.ok( bookingService.createOrderWithAtomicBookings(RequestAttr.USER_ID.get(request), bookingRequests) );

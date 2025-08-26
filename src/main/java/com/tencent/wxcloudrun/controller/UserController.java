@@ -5,10 +5,7 @@ import com.tencent.wxcloudrun.config.ApiResponse;
 import com.tencent.wxcloudrun.model.User;
 import com.tencent.wxcloudrun.service.impl.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -23,4 +20,15 @@ public class UserController {
         user.setOpenid(RequestAttr.OPEN_ID.get(request));
         int row = userService.updateUserPhoneNumber(user);
         return ApiResponse.ok(row);
-    }}
+    }
+
+    @GetMapping("/getAllUserBalance")
+    public ApiResponse getUser(@RequestParam("userId") Long userId) {
+        return ApiResponse.ok();
+    }
+
+    @GetMapping("/getUserInfo")
+    public ApiResponse getUserInfo(HttpServletRequest request) {
+        return ApiResponse.ok(userService.getUserById(RequestAttr.USER_ID.get(request)));
+    }
+}
