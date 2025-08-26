@@ -185,6 +185,7 @@
     </select>
 
     <select id="selectTimeSlotPricesByCourt" resultType="com.tencent.wxcloudrun.dto.TimeSlotPrice">
+        select a.*,b.user_id,c.role_id from (
         SELECT
         c.id as court_id,
         c.name as court_name,
@@ -225,11 +226,11 @@
         -- 检查是否可预订
         CASE
         WHEN EXISTS (
-            SELECT 1 FROM booking b
-            WHERE b.date = #{date}
-            AND b.court_id = c.id
-            AND b.time_slot_id = ts.id
-            AND b.status = 'confirmed'
+        SELECT 1 FROM booking b
+        WHERE b.date = #{date}
+        AND b.court_id = c.id
+        AND b.time_slot_id = ts.id
+        AND b.status = 'confirmed'
         ) THEN false
         ELSE true
         END as available
@@ -238,7 +239,21 @@
         <if test="courtId != null">
             And c.id = #{courtId}
         </if>
-        ORDER BY c.id, ts.start_time;
+        ORDER BY c.id, ts.start_time
+        ) a
+        left join
+        (
+        select * from booking
+        where date = #{date} AND status = 'confirmed'
+        ) b on
+        a.time_slot_id = b.time_slot_id
+        left join
+        (
+        select * from user_roles
+        where role_id = 4
+        ) c
+        on b.user_id = c.user_id
+        ORDER BY a.court_id,a.time_slot_id
     </select>
 
 
