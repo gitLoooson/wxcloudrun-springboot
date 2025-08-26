@@ -181,6 +181,7 @@
         where role_id = 4
         ) c
         on b.user_id = c.user_id
+        ORDER BY a.court_id,a.time_slot_id
     </select>
 
     <select id="selectTimeSlotPricesByCourt" resultType="com.tencent.wxcloudrun.dto.TimeSlotPrice">

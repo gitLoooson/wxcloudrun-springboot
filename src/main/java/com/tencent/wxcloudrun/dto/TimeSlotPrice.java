@@ -16,4 +16,5 @@ public class TimeSlotPrice {
     private Long courtId;
     private String courtName;
     private boolean available; // 该时间段是否可用
+    private Long roleId;
 }
