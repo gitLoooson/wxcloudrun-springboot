@@ -44,20 +44,8 @@
         LEFT JOIN user u ON tr.user_id = u.id
         LEFT JOIN `order` o ON tr.order_id = o.id
         WHERE 1=1
-        <if test="userId != null">
-            AND tr.user_id = #{userId}
-        </if>
-        <if test="type != null and type != ''">
-            AND tr.type = #{type}
-        </if>
-        <if test="startTime != null">
-            AND tr.create_time >= #{startTime}
-        </if>
-        <if test="endTime != null">
-            AND tr.create_time &lt;= #{endTime}
-        </if>
+        AND tr.user_id = #{userId}
         ORDER BY tr.create_time DESC
-        LIMIT #{limit} OFFSET #{offset}
     </select>
 
     <select id="countTransactionsByCondition" resultType="int">

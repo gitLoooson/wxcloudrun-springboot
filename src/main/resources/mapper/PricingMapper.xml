@@ -113,18 +113,27 @@
 
     <!-- PricingMapper.xml 中添加 -->
     <select id="selectAllTimeSlotPrices" resultType="com.tencent.wxcloudrun.dto.TimeSlotPrice">
+        select a.*,b.user_id,c.role_id from (
         SELECT
-        ts.id as timeSlotId,
-        ts.start_time as startTime,
-        ts.end_time as endTime,
-        ts.period_type as periodType,
-        COALESCE((
+        c.id as court_id,
+        c.name as court_name,
+        ts.id time_slot_id,
+        ts.start_time,
+        ts.end_time,
+        ts.period_type,
+        CASE
+        WHEN DAYOFWEEK(#{date}) IN (1,7) THEN 'weekend'
+        ELSE 'weekday'
+        END as day_type,
+        -- 计算价格
+        COALESCE(
+        (
         SELECT pd.price
         FROM pricing_detail pd
         JOIN pricing_policy pp ON pd.policy_id = pp.id
         WHERE pp.is_active = true
         AND #{date} BETWEEN pd.start_date AND pd.end_date
-        AND (pd.court_id IS NULL OR pd.court_id = #{courtId})
+        AND (pd.court_id IS NULL OR pd.court_id = c.id)
         AND (pd.time_slot_id IS NULL OR pd.time_slot_id = ts.id)
         AND (pd.period_type IS NULL OR pd.period_type = ts.period_type)
         AND (pd.day_type IS NULL OR pd.day_type =
@@ -134,32 +143,44 @@
         END)
         ORDER BY
         pd.priority ASC,
-        pd.court_id DESC NULLS LAST,
-        pd.time_slot_id DESC NULLS LAST,
-        pd.period_type DESC NULLS LAST,
-        pd.day_type DESC NULLS LAST
+        CASE WHEN pd.court_id IS NULL THEN 1 ELSE 0 END ASC,
+        CASE WHEN pd.time_slot_id IS NULL THEN 1 ELSE 0 END ASC,
+        CASE WHEN pd.period_type IS NULL THEN 1 ELSE 0 END ASC,
+        CASE WHEN pd.day_type IS NULL THEN 1 ELSE 0 END ASC
         LIMIT 1
-        ), 50.00) as price,
-        CASE
-        WHEN DAYOFWEEK(#{date}) IN (1,7) THEN 'weekend'
-        ELSE 'weekday'
-        END as dayType,
-        #{courtId} as courtId,
-        c.name as courtName,
+        ),
+        50.00  -- 默认价格
+        ) as price,
+        -- 检查是否可预订
         CASE
         WHEN EXISTS (
         SELECT 1 FROM booking b
         WHERE b.date = #{date}
-        AND b.court_id = #{courtId}
+        AND b.court_id = c.id
         AND b.time_slot_id = ts.id
         AND b.status = 'confirmed'
         ) THEN false
         ELSE true
         END as available
-        FROM time_slot ts
-        CROSS JOIN court c
-        WHERE c.id = #{courtId}
-        ORDER BY ts.start_time
+        FROM time_slot ts, court c
+        where 1 = 1
+        <if test="courtId != null">
+            And c.id = #{courtId}
+        </if>
+        ORDER BY c.id, ts.start_time
+        ) a
+        left join
+        (
+        select * from booking
+        where date = #{date} AND status = 'confirmed'
+        ) b on
+        a.time_slot_id = b.time_slot_id
+        left join
+        (
+        select * from user_roles
+        where role_id = 4
+        ) c
+        on b.user_id = c.user_id
     </select>
 
     <select id="selectTimeSlotPricesByCourt" resultType="com.tencent.wxcloudrun.dto.TimeSlotPrice">
