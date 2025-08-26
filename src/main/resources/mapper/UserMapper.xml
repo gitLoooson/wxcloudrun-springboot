@@ -32,4 +32,10 @@
         on u.id = uc.user_id
         WHERE u.id = #{userId}
     </select>
+
+    <select id="getAllUserInfo" resultType="com.tencent.wxcloudrun.model.User">
+        SELECT u.*,uc.balance FROM user u
+        left join user_account uc
+        on u.id = uc.user_id
+    </select>
 </mapper>

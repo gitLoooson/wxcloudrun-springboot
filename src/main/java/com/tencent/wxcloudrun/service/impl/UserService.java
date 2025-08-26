@@ -97,4 +97,8 @@ public class UserService {
     public User getUserById(Long userId) {
         return userMapper.findByUserId(userId);
     }
+
+    public Page<User> getAllUserInfo(Page<User> page) {
+        return userMapper.getAllUserInfo(page);
+    }
 }

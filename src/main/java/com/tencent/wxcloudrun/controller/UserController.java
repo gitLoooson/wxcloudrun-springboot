@@ -1,6 +1,9 @@
 package com.tencent.wxcloudrun.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.tencent.wxcloudrun.anno.RequestAttr;
+import com.tencent.wxcloudrun.anno.roles.RequiresRoles;
+import com.tencent.wxcloudrun.anno.roles.RoleEnum;
 import com.tencent.wxcloudrun.config.ApiResponse;
 import com.tencent.wxcloudrun.model.User;
 import com.tencent.wxcloudrun.service.impl.UserService;
@@ -22,9 +25,12 @@ public class UserController {
         return ApiResponse.ok(row);
     }
 
-    @GetMapping("/getAllUserBalance")
-    public ApiResponse getUser(@RequestParam("userId") Long userId) {
-        return ApiResponse.ok();
+    @GetMapping("/getAllUserInfo")
+    @RequiresRoles({RoleEnum.ADMIN_COURT})
+    public ApiResponse getAllUserInfo(@RequestParam(defaultValue = "1") Integer current
+            ,@RequestParam(defaultValue = "10") Integer size) {
+        Page<User> page = new Page<>(current, size);
+        return ApiResponse.ok(userService.getAllUserInfo(page));
     }
 
     @GetMapping("/getUserInfo")

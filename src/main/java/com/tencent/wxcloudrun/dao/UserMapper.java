@@ -24,4 +24,6 @@ public interface UserMapper {
 
     @Update("UPDATE user SET phone_number=#{phoneNumber} WHERE openid=#{openid}")
     int updatePhoneNumber(User user);
+
+    Page<User> getAllUserInfo(Page<User> page);
 }
