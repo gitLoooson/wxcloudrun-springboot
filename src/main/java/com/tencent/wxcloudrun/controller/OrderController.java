@@ -1,10 +1,16 @@
 package com.tencent.wxcloudrun.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.tencent.wxcloudrun.anno.RequestAttr;
+import com.tencent.wxcloudrun.anno.roles.RequiresRoles;
+import com.tencent.wxcloudrun.anno.roles.RoleEnum;
 import com.tencent.wxcloudrun.config.ApiResponse;
 import com.tencent.wxcloudrun.model.Order;
 import com.tencent.wxcloudrun.service.impl.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
 
 // OrderController.java
 @RestController
@@ -47,13 +53,18 @@ public class OrderController {
         return order == null ? ApiResponse.ok() : ApiResponse.ok(order);
     }
 
-    @GetMapping("/user/{userId}")
-    public ApiResponse getUserOrders(@PathVariable Long userId) {
-        return ApiResponse.ok(orderService.getUserOrders(userId));
+    @GetMapping("/user")
+    public ApiResponse getUserOrders(HttpServletRequest request,@RequestParam(defaultValue = "1") Integer current
+            ,@RequestParam(defaultValue = "10") Integer size) {
+        Page<Order> page = new Page<>(current, size);
+        return ApiResponse.ok(orderService.getUserOrders(RequestAttr.USER_ID.get(request),page));
     }
 
     @GetMapping("/getAllOrders")
-    public ApiResponse getAllOrders() {
-        return ApiResponse.ok(orderService.getAllOrders());
+    @RequiresRoles({RoleEnum.ADMIN_COURT})
+    public ApiResponse getAllOrders(@RequestParam(defaultValue = "1") Integer current
+            ,@RequestParam(defaultValue = "10") Integer size) {
+        Page<Order> page = new Page<>(current, size);
+        return ApiResponse.ok(orderService.getAllOrders(page));
     }
 }

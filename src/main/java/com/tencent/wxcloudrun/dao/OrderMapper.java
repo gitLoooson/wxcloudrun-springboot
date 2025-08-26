@@ -1,5 +1,6 @@
 package com.tencent.wxcloudrun.dao;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.tencent.wxcloudrun.model.Order;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -16,7 +17,7 @@ public interface OrderMapper {
                           @Param("cancelReason") String cancelReason);
     Order selectOrderById(Long id);
     Order selectOrderByNumber(String orderNumber);
-    List<Order> selectOrdersByUser(Long userId);
+    Page<Order> selectOrdersByUser(Long userId, Page<Order> page);
     List<Order> selectOrdersByStatus(String status);
 
     // 更新订单金额
@@ -26,7 +27,7 @@ public interface OrderMapper {
     int updateBookingsOrderId(@Param("orderId") Long orderId,
                               @Param("bookingIds") List<Long> bookingIds);
 
-    List<Order> getAllOrders();
+    Page<Order> getAllOrders(Page<Order> page);
 
     /**
      * 检查订单是否可以取消（返回详细信息）

@@ -1,11 +1,16 @@
 package com.tencent.wxcloudrun.controller;
 
+import com.tencent.wxcloudrun.anno.RequestAttr;
 import com.tencent.wxcloudrun.config.ApiResponse;
 import com.tencent.wxcloudrun.dto.BookingRequest;
 import com.tencent.wxcloudrun.service.impl.BookingService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @RestController
@@ -14,11 +19,15 @@ import java.util.List;
 public class BookingController {
     private final BookingService bookingService;
 
-    @PostMapping("/batch")
+    @PostMapping("/createOrder")
     public ApiResponse createBatchBookings(
-            @RequestParam Long userId,
+            HttpServletRequest request,
             @RequestBody List<BookingRequest> bookingRequests
             ) {
-        return ApiResponse.ok( bookingService.createOrderWithAtomicBookings(userId, bookingRequests) );
+        for (int i = 0; i < bookingRequests.size(); i++) {
+            BookingRequest bookingRequest = bookingRequests.get(i);
+            bookingRequest.setUserId(RequestAttr.USER_ID.get(request));
+        }
+        return ApiResponse.ok( bookingService.createOrderWithAtomicBookings(RequestAttr.USER_ID.get(request), bookingRequests) );
     }
 }

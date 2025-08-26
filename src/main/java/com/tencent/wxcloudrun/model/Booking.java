@@ -5,7 +5,6 @@ import lombok.Data;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 @Data
 public class Booking {
@@ -18,9 +17,7 @@ public class Booking {
     private String status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-
-    private String courtName;
-    private LocalTime startTime;
-    private LocalTime endTime;
-    private String username;
+    private Long orderId;
+    // 用于有时拼接timeslot start_time - end_time
+    private String time;
 }

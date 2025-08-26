@@ -1,5 +1,6 @@
 package com.tencent.wxcloudrun.service.impl;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.tencent.wxcloudrun.dao.OrderMapper;
 import com.tencent.wxcloudrun.enums.OrderStatus;
 import com.tencent.wxcloudrun.model.Booking;
@@ -47,12 +48,12 @@ public class OrderService {
         return order;
     }
 
-    public List<Order> getUserOrders(Long userId) {
-        return orderMapper.selectOrdersByUser(userId);
+    public Page<Order> getUserOrders(Long userId, Page<Order> page) {
+        return orderMapper.selectOrdersByUser(userId,page);
     }
 
-    public List<Order> getAllOrders() {
-        return orderMapper.getAllOrders();
+    public Page<Order> getAllOrders(Page<Order> page) {
+        return orderMapper.getAllOrders(page);
     }
 
 }

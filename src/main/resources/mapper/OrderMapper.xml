@@ -2,6 +2,23 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.tencent.wxcloudrun.dao.OrderMapper">
 
+    <resultMap id="orderResultMap" type="com.tencent.wxcloudrun.model.Order">
+        <id property="id" column="id"/>
+        <result property="orderNumber" column="order_number"/>
+        <result property="userId" column="user_id"/>
+        <result property="totalAmount" column="total_amount"/>
+        <result property="status" column="status"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="cancelReason" column="cancel_reason"/>
+        <result property="cancelledTime" column="cancelled_time"/>
+        <result property="username" column="username"/>
+        <result property="phoneNumber" column="phone_number" />
+
+        <collection property="bookings" ofType="com.tencent.wxcloudrun.model.Booking"
+                    select="selectBookingsByOrderId" column="id"/>
+    </resultMap>
+
     <insert id="insertOrder" parameterType="com.tencent.wxcloudrun.model.Order" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO `order` (order_number, user_id, total_amount, status,
         create_time, update_time, cancel_reason, cancelled_time)
@@ -44,8 +61,8 @@
         WHERE o.status = #{status}
     </select>
 
-    <select id="selectOrdersByUser" resultType="com.tencent.wxcloudrun.model.Order">
-        SELECT o.*, u.username
+    <select id="selectOrdersByUser" resultMap="orderResultMap">
+        SELECT o.*,u.username,u.phone_number
         FROM `order` o
         LEFT JOIN user u ON o.user_id = u.id
         WHERE u.id = #{userId}
@@ -68,9 +85,20 @@
         </foreach>
     </update>
 
-    <select id="getAllOrders" resultType="com.tencent.wxcloudrun.model.Order">
-        SELECT o.*
+    <select id="getAllOrders" resultMap="orderResultMap">
+        SELECT o.*,u.username,u.phone_number
         FROM `order` o
+        left join user u
+        on o.user_id = u.id
+    </select>
+    
+    <select id="selectBookingsByOrderId" resultType="com.tencent.wxcloudrun.model.Booking">
+        select b.*,CONCAT(t.start_time,'-',t.end_time) time  from booking b
+        left join `order` o
+        on b.order_id = o.id
+        left join time_slot t
+        on b.time_slot_id = t.id
+        where b.order_id = #{order_id}
     </select>
 
     <select id="checkOrderCancelable" resultType="java.util.HashMap">

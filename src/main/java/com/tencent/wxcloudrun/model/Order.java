@@ -21,5 +21,6 @@ public class Order {
 
     // 关联字段
     private String username;
+    private String phoneNumber;
     private List<Booking> bookings;
 }

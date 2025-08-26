@@ -42,7 +42,7 @@ public class BookingService {
         // 1. 预先计算所有价格和创建预订对象
         for (BookingRequest request : bookingRequests) {
             Optional<TimeSlotPrice> firstMatching = timeSlotPricesByCourt.stream().findFirst().filter(timeSlotPrices -> timeSlotPrices.getTimeSlotId().equals(request.getTimeSlotId()));
-            if(firstMatching.isPresent()) {
+            if(firstMatching.isPresent() && firstMatching.get().isAvailable()) {
                 Booking booking = new Booking();
                 booking.setCourtId(request.getCourtId());
                 booking.setTimeSlotId(request.getTimeSlotId());
@@ -50,8 +50,6 @@ public class BookingService {
                 booking.setUserId(userId);
                 booking.setPrice(firstMatching.get().getPrice());
                 booking.setStatus("confirmed");
-                booking.setCreatedAt(LocalDateTime.now());
-                booking.setUpdatedAt(LocalDateTime.now());
                 bookingsToInsert.add(booking);
             }else{
                 throw new RuntimeException("请联系管理员!时间段" + request.getTimeSlotId() +"未设置价格!");
