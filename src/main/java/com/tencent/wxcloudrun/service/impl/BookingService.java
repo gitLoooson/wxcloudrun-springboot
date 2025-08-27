@@ -38,7 +38,7 @@ public class BookingService {
 
         // 1. 预先计算所有价格和创建预订对象
         for (BookingRequest request : bookingRequests) {
-            Optional<TimeSlotPrice> firstMatching = timeSlotPricesByCourt.stream().findFirst().filter(timeSlotPrices -> timeSlotPrices.getTimeSlotId().equals(request.getTimeSlotId()));
+            Optional<TimeSlotPrice> firstMatching = timeSlotPricesByCourt.stream().filter(timeSlotPrices -> timeSlotPrices.getTimeSlotId().equals(request.getTimeSlotId())).findFirst();
             if(firstMatching.isPresent() && firstMatching.get().isAvailable()) {
                 Booking booking = new Booking();
                 booking.setCourtId(request.getCourtId());
@@ -121,6 +121,7 @@ public class BookingService {
         if (paymentSuccess) {
             // 更新订单状态为已确认
             orderMapper.updateOrderStatus(order.getId(), OrderStatus.CONFIRMED.getCode(), null);
+            order.setStatus(OrderStatus.PENDING.getCode());
         }
         return order;
     }
