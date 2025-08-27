@@ -29,7 +29,8 @@ public class WebConfig implements WebMvcConfigurer {
                         "/webjars/**",       // 放行webjars
                         "/v2/api-docs",      // 放行api文档
                         "/doc.html",          // 放行swagger-ui
-                        "/images/getAllImages" // 放行获取所有图片接口
+                        "/images/getAllImages", // 放行获取所有图片接口
+                        "/api/pricing/time-slots/formatted"
                 );
 
         registry.addInterceptor(roleInterceptor)
