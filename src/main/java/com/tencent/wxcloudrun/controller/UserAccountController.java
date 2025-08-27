@@ -1,6 +1,7 @@
 package com.tencent.wxcloudrun.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.tencent.wxcloudrun.anno.MiniLog;
 import com.tencent.wxcloudrun.anno.RequestAttr;
 import com.tencent.wxcloudrun.anno.roles.RequiresRoles;
 import com.tencent.wxcloudrun.anno.roles.RoleEnum;
@@ -23,6 +24,7 @@ public class UserAccountController {
 
     @PostMapping("/recharge")
     @RequiresRoles({RoleEnum.ADMIN_COURT})
+    @MiniLog("管理员充值")
     public ApiResponse recharge(@RequestBody RechargeDto rechargeDto) {
         boolean success = userAccountService.recharge(rechargeDto.getUserId(), rechargeDto.getAmount(),
                 rechargeDto.getDescription() != null ? rechargeDto.getDescription() : "用户充值");

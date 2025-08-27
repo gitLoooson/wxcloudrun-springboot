@@ -1,6 +1,7 @@
 package com.tencent.wxcloudrun.config;
 
 import com.tencent.wxcloudrun.interceptor.JwtInterceptor;
+import com.tencent.wxcloudrun.interceptor.MiniLogInterceptor;
 import com.tencent.wxcloudrun.interceptor.RoleInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -17,6 +18,9 @@ public class WebConfig implements WebMvcConfigurer {
     @Autowired
     private RoleInterceptor roleInterceptor;
 
+
+    @Autowired
+    private MiniLogInterceptor miniLogInterceptor;
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         // 注册拦截器
@@ -36,6 +40,9 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addInterceptor(roleInterceptor)
                 .addPathPatterns("/**") // 拦截所有路径
                 .excludePathPatterns("/login", "/register"); // 排除不需要拦截的路径
+
+        registry.addInterceptor(miniLogInterceptor)
+                .addPathPatterns("/**"); // 只拦截api路径
     }
 
     @Override
