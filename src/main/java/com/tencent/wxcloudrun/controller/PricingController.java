@@ -67,6 +67,7 @@ public class PricingController {
     @GetMapping("/time-slots/formatted")
     public ApiResponse getFormattedTimeSlotPrices(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+
         return ApiResponse.ok(pricingService.getFormattedTimeSlotPrices(date));
     }
 
