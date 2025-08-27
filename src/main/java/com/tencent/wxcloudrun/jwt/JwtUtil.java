@@ -1,21 +1,22 @@
 package com.tencent.wxcloudrun.jwt;
 
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 public class JwtUtil {
 
     @Value("${jwt.secret}")
-    private String secret;
+    private String secret;  // Base64 编码的 key，至少 64 字节
 
     @Value("${jwt.expire}")
     private long expire;
@@ -28,34 +29,14 @@ public class JwtUtil {
 
     @PostConstruct
     public void init() {
-        try {
-            // 生成确定性密钥
-            this.secretKey = generateDeterministicSecretKey(secret);
+        // 从 Base64 解码生成 SecretKey
+        byte[] keyBytes = Decoders.BASE64.decode(secret);
+        this.secretKey = Keys.hmacShaKeyFor(keyBytes);
 
-            // 只初始化一次 parser，线程安全 & 高性能
-            this.jwtParser = Jwts.parserBuilder()
-                    .setSigningKey(secretKey)
-                    .build();
-        } catch (Exception e) {
-            throw new RuntimeException("JWT initialization failed", e);
-        }
-    }
-
-    /**
-     * 确定性密钥生成：SHA-256(secret) → 前32字节
-     */
-    private SecretKey generateDeterministicSecretKey(String secret) {
-        try {
-            byte[] secretBytes = secret.getBytes(StandardCharsets.UTF_8);
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hashedBytes = digest.digest(secretBytes);
-
-            // 直接取前32字节作为 HmacSHA256 密钥
-            byte[] keyBytes = Arrays.copyOf(hashedBytes, 32);
-            return new SecretKeySpec(keyBytes, "HmacSHA256");
-        } catch (Exception e) {
-            throw new RuntimeException("Secret key generation failed", e);
-        }
+        // 初始化 parser，线程安全
+        this.jwtParser = Jwts.parserBuilder()
+                .setSigningKey(secretKey)
+                .build();
     }
 
     public String generateToken(String openid, Long id) {
@@ -92,16 +73,15 @@ public class JwtUtil {
             getClaimsFromToken(token);
             return true;
         } catch (JwtException e) {
-            // 可以换成日志框架：log.warn("Invalid token", e);
             System.out.println("Invalid token: " + e.getMessage());
             return false;
         }
     }
 
     /**
-     * 获取密钥信息（调试用）
+     * 调试用：打印 SecretKey Base64
      */
     public String getKeyInfo() {
-        return Base64.getEncoder().encodeToString(secretKey.getEncoded());
+        return io.jsonwebtoken.io.Encoders.BASE64.encode(secretKey.getEncoded());
     }
 }
