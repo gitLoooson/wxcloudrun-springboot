@@ -11,7 +11,7 @@ import java.util.Map;
 
 @Mapper
 public interface OrderMapper {
-    int insertOrder(Order order);
+    Long insertOrder(Order order);
     int updateOrderStatus(@Param("id") Long id,
                           @Param("status") String status,
                           @Param("cancelReason") String cancelReason);
@@ -25,7 +25,7 @@ public interface OrderMapper {
 
     // 批量更新预订的订单ID
     int updateBookingsOrderId(@Param("orderId") Long orderId,
-                              @Param("bookingIds") List<Long> bookingIds);
+                              @Param("orderNumber") String orderNumber);
 
     Page<Order> getAllOrders(Page<Order> page);
 

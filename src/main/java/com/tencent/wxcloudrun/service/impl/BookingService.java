@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -30,7 +29,7 @@ public class BookingService {
     /**
      * 原子性批量预订 - 任何一个失败就全部回滚
      */
-    private BatchBookingResult createAtomicBatchBookings(Long userId, List<BookingRequest> bookingRequests) {
+    private BatchBookingResult createAtomicBatchBookings(Long userId, List<BookingRequest> bookingRequests, String orderNumber) {
         BatchBookingResult result = new BatchBookingResult();
         List<Booking> bookingsToInsert = new ArrayList<>();
 
@@ -47,6 +46,7 @@ public class BookingService {
                 booking.setUserId(userId);
                 booking.setPrice(firstMatching.get().getPrice());
                 booking.setStatus("confirmed");
+                booking.setOrderNumber(orderNumber);
                 bookingsToInsert.add(booking);
             }else{
                 throw new RuntimeException("请联系管理员!时间段" + request.getTimeSlotId() +"未设置价格!");
@@ -81,7 +81,7 @@ public class BookingService {
         String orderNumber = generateOrderNumber();
 
         // 2. 创建预订（原子性操作）
-        BatchBookingResult bookingResult = createAtomicBatchBookings(userId, bookingRequests);
+        BatchBookingResult bookingResult = createAtomicBatchBookings(userId, bookingRequests,orderNumber);
 
         if (bookingResult.getSuccessfulBookings().isEmpty()) {
             throw new RuntimeException("预订冲突：存在已选择的时间段!");
@@ -103,12 +103,7 @@ public class BookingService {
 
         orderMapper.insertOrder(order);
 
-        // 5. 更新预订的订单ID
-        List<Long> bookingIds = bookingResult.getSuccessfulBookings().stream()
-                .map(Booking::getId)
-                .collect(Collectors.toList());
-
-        orderMapper.updateBookingsOrderId(order.getId(), bookingIds);
+        orderMapper.updateBookingsOrderId(order.getId(), orderNumber);
 
         // 扣款支付
         boolean paymentSuccess = userAccountService.consume(

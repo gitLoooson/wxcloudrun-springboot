@@ -20,4 +20,5 @@ public class Booking {
     private Long orderId;
     // 用于有时拼接timeslot start_time - end_time
     private String time;
+    private String orderNumber;
 }

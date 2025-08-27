@@ -3,7 +3,7 @@
 
     <!-- BookingMapper.xml 中添加 -->
     <insert id="insertBatchBookings" parameterType="java.util.List">
-        INSERT INTO booking (court_id, time_slot_id, date, user_id, price, status, created_at, updated_at)
+        INSERT INTO booking (court_id, time_slot_id, date, user_id, price, status, created_at, updated_at,order_number)
         VALUES
         <foreach collection="bookings" item="booking" separator=",">
             (
@@ -14,7 +14,8 @@
             #{booking.price},
             #{booking.status},
             #{booking.createdAt},
-            #{booking.updatedAt}
+            #{booking.updatedAt},
+            #{booking.orderNumber}
             )
         </foreach>
     </insert>

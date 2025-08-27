@@ -79,10 +79,7 @@
         UPDATE booking
         SET order_id = #{orderId},
         updated_at = NOW()
-        WHERE id IN
-        <foreach collection="bookingIds" item="id" open="(" separator="," close=")">
-            #{id}
-        </foreach>
+        WHERE order_number = #{orderNumber}
     </update>
 
     <select id="getAllOrders" resultMap="orderResultMap">
