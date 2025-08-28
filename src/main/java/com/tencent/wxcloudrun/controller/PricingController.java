@@ -1,5 +1,6 @@
 package com.tencent.wxcloudrun.controller;
 
+import com.tencent.wxcloudrun.anno.MiniLog;
 import com.tencent.wxcloudrun.anno.roles.RequiresRoles;
 import com.tencent.wxcloudrun.anno.roles.RoleEnum;
 import com.tencent.wxcloudrun.config.ApiResponse;
@@ -56,6 +57,7 @@ public class PricingController {
 
     @GetMapping("/getPrices")
     @RequiresRoles({RoleEnum.ADMIN_COURT})
+    @MiniLog("管理员获取球场所有的价格")
     public ApiResponse getPrices(
             @RequestParam(required = false) Long courtId,
             @RequestParam(required = false) Long timeSlotId,
@@ -65,6 +67,7 @@ public class PricingController {
     }
 
     @GetMapping("/time-slots/formatted")
+    @MiniLog("获取球场预约信息")
     public ApiResponse getFormattedTimeSlotPrices(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
 
@@ -73,6 +76,7 @@ public class PricingController {
 
     @PostMapping("/setPrices")
     @RequiresRoles({RoleEnum.ADMIN_COURT})
+    @MiniLog("管理员设置球场价格")
     public ApiResponse setPrices(@RequestBody List<PricingDetail> details) {
         return ApiResponse.ok(pricingService.setPrices(details));
     }

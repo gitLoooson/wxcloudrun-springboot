@@ -1,6 +1,7 @@
 package com.tencent.wxcloudrun.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.tencent.wxcloudrun.anno.MiniLog;
 import com.tencent.wxcloudrun.anno.RequestAttr;
 import com.tencent.wxcloudrun.anno.roles.RequiresRoles;
 import com.tencent.wxcloudrun.anno.roles.RoleEnum;
@@ -20,6 +21,7 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping("/cancel")
+    @MiniLog("用户手动取消订单")
     public ApiResponse cancelOrder(
             @RequestBody Order order,HttpServletRequest request) {
         boolean success = orderService.cancelOrder(order.getId(), order.getCancelReason() == null ? "用户手动取消!" : order.getCancelReason(),RequestAttr.USER_ID.get(request));
@@ -30,6 +32,7 @@ public class OrderController {
 
     @PostMapping("/cancelByAdmin")
     @RequiresRoles({RoleEnum.ADMIN_COURT})
+    @MiniLog("管理员手动取消订单")
     public ApiResponse cancelByAdmin(
             @RequestBody Order order,HttpServletRequest request) {
         boolean success = orderService.cancelOrder(order.getId(), order.getCancelReason() == null ? RequestAttr.USER_ID.get(request) +"管理员取消!" : order.getCancelReason(),null);
@@ -51,6 +54,7 @@ public class OrderController {
     }
 
     @GetMapping("/user")
+    @MiniLog("获取个人的订单明细")
     public ApiResponse getUserOrders(HttpServletRequest request,@RequestParam(defaultValue = "1") Integer current
             ,@RequestParam(defaultValue = "10") Integer size) {
         Page<Order> page = new Page<>(current, size);
@@ -59,6 +63,7 @@ public class OrderController {
 
     @GetMapping("/getAllOrders")
     @RequiresRoles({RoleEnum.ADMIN_COURT})
+    @MiniLog("管理员获取所有人的订单明细")
     public ApiResponse getAllOrders(@RequestParam(defaultValue = "1") Integer current
             ,@RequestParam(defaultValue = "10") Integer size) {
         Page<Order> page = new Page<>(current, size);

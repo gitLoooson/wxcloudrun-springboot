@@ -32,6 +32,7 @@ public class UserAccountController {
     }
 
     @GetMapping("/transactions")
+    @MiniLog("获取个人积分交易明细")
     public ApiResponse getTransactions(
             @RequestParam(defaultValue = "1") int current,
             @RequestParam(defaultValue = "10") int size, HttpServletRequest request) {

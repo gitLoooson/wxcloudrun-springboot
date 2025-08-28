@@ -2,6 +2,7 @@ package com.tencent.wxcloudrun.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.tencent.wxcloudrun.anno.MiniLog;
 import com.tencent.wxcloudrun.anno.RequestAttr;
 import com.tencent.wxcloudrun.anno.roles.RequiresRoles;
 import com.tencent.wxcloudrun.anno.roles.RoleEnum;
@@ -29,6 +30,7 @@ public class RolesController {
     private RolesService rolesService;
 
     @PostMapping("/getRolesIds")
+    @MiniLog("获取用户个人的角色")
     public ApiResponse getRolesIds(HttpServletRequest request) {
         try {
             List<String> roles = userRolesService.getRolesIdByUserId(RequestAttr.USER_ID.get(request));
@@ -42,6 +44,7 @@ public class RolesController {
 
     @RequiresRoles({RoleEnum.ADMIN_COURT})
     @GetMapping("/getAllUsersWithRoles")
+    @MiniLog("管理员获取所有用户信息及角色")
     public ApiResponse getAllUsersWithRoles(
             @RequestParam(defaultValue = "1") Integer current,
             @RequestParam(defaultValue = "10") Integer size){
@@ -52,6 +55,7 @@ public class RolesController {
 
     @GetMapping("/getAllRoles")
     @RequiresRoles({RoleEnum.ADMIN_COURT})
+    @MiniLog("管理员获取所有角色清单")
     public ApiResponse getAllRoles(){
         return ApiResponse.ok(rolesService.getAllRoles());
     }
@@ -59,9 +63,10 @@ public class RolesController {
     // 更新用户角色
     @PostMapping("/updateUserRoles")
     @RequiresRoles({RoleEnum.ADMIN_COURT})
+    @MiniLog("管理员更新用户角色")
     public ApiResponse updateUserRoles(
             @RequestBody UpdateUserRolesRequestDTO request) {
         userRolesService.updateUserRoles(request.getUserId(), request.getRoleIds());
-        return ApiResponse.ok("权限更新成功!");
+        return ApiResponse.ok("觉得更新成功!");
     }
 }

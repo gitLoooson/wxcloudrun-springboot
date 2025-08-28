@@ -4,6 +4,7 @@ package com.tencent.wxcloudrun.controller;
 import cn.binarywang.wx.miniapp.api.WxMaService;
 import cn.binarywang.wx.miniapp.bean.WxMaJscode2SessionResult;
 import cn.binarywang.wx.miniapp.bean.WxMaPhoneNumberInfo;
+import com.tencent.wxcloudrun.anno.MiniLog;
 import com.tencent.wxcloudrun.anno.RequestAttr;
 import com.tencent.wxcloudrun.config.ApiResponse;
 import com.tencent.wxcloudrun.dto.LoginRequestDTO;
@@ -26,6 +27,7 @@ public class AuthController {
     private WxMaService wxMaService;
 
     @PostMapping("/login")
+    @MiniLog("通过openid登陆")
     public ApiResponse login(@RequestBody LoginRequestDTO loginRequest) {
         try {
             Map<String, Object> result = userService.loginOrRegister(null,loginRequest.getCode(), loginRequest.getUsername(), loginRequest.getAvatar());
@@ -36,6 +38,7 @@ public class AuthController {
     }
 
     @PostMapping("/loginByPhone")
+    @MiniLog("通过电话号码登陆")
     public ApiResponse login(@RequestBody LoginRequestPhoneDTO loginRequest) {
         try {
             // 使用jsCode获取session信息
@@ -64,7 +67,7 @@ public class AuthController {
     @GetMapping("/userInfo")
     public ApiResponse getUserInfo(HttpServletRequest request) {
         try {
-            User user = userService.getUserByOpenId(RequestAttr.OPEN_ID.get(request));
+            User user = userService.getUserById(RequestAttr.USER_ID.get(request));
             return ApiResponse.ok(user);
         } catch (Exception e) {
             return ApiResponse.error(e.getMessage());

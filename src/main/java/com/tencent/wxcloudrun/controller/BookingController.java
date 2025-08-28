@@ -1,5 +1,6 @@
 package com.tencent.wxcloudrun.controller;
 
+import com.tencent.wxcloudrun.anno.MiniLog;
 import com.tencent.wxcloudrun.anno.RequestAttr;
 import com.tencent.wxcloudrun.config.ApiResponse;
 import com.tencent.wxcloudrun.dto.BookingRequest;
@@ -20,6 +21,7 @@ public class BookingController {
     private final BookingService bookingService;
 
     @PostMapping("/createOrder")
+    @MiniLog("创建订单")
     public ApiResponse createBatchBookings(
             HttpServletRequest request,
             @RequestBody List<BookingRequest> bookingRequests

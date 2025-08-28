@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -57,15 +58,19 @@ public class UserService {
             user.setOpenid(openid);
             user.setUsername(username);
             user.setAvatar(avatar);
+            user.setBalance(BigDecimal.ZERO);
             int insert = userMapper.insert(user);
 
             UserRoles userRoles = new UserRoles();
-            userRoles.setUserId(Long.getLong(String.valueOf(insert)));
-            userRoles.setRoleId(Long.getLong(USER_COURT.getId().toString()));
+            userRoles.setUserId(Long.valueOf(String.valueOf(user.getId())));
+            userRoles.setRoleId(Long.valueOf(USER_COURT.getId().toString()));
             userRolesMapper.insert(userRoles);
 
             UserAccount userAccount = new UserAccount();
-            userAccount.setUserId(Long.getLong(String.valueOf(insert)));
+            userAccount.setUserId(Long.valueOf(String.valueOf(user.getId())));
+            userAccount.setBalance(BigDecimal.ZERO);
+            userAccount.setTotalConsumption(BigDecimal.ZERO);
+            userAccount.setTotalRecharge(BigDecimal.ZERO);
             userAccountMapper.insertUserAccount(userAccount);
         } else {
 //             4. 存在则更新用户信息(可选)
@@ -75,7 +80,6 @@ public class UserService {
         }
 
         // 5. 生成并返回token
-
         Map<String, Object> result = new HashMap<>();
         result.put("token", jwtUtil.generateToken(openid,user.getId()));
         result.put("user", user);
