@@ -74,11 +74,6 @@ public class UserService {
             userAccount.setTotalConsumption(BigDecimal.ZERO);
             userAccount.setTotalRecharge(BigDecimal.ZERO);
             userAccountMapper.insertUserAccount(userAccount);
-        } else {
-//             4. 存在则更新用户信息(可选)
-//            user.setUsername(username);
-//            user.setAvatar(avatar);
-//            userMapper.update(user);
         }
 
         // 5. 生成并返回token
