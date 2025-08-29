@@ -52,6 +52,8 @@ public class UserService {
         // 2. 查询用户是否存在
         User user = userMapper.findByOpenid(openid);
 
+        boolean isFirstLogin = user == null;
+
         // 3. 不存在则注册
         if (user == null) {
             user = new User();
@@ -74,15 +76,16 @@ public class UserService {
             userAccountMapper.insertUserAccount(userAccount);
         } else {
 //             4. 存在则更新用户信息(可选)
-            user.setUsername(username);
-            user.setAvatar(avatar);
-            userMapper.update(user);
+//            user.setUsername(username);
+//            user.setAvatar(avatar);
+//            userMapper.update(user);
         }
 
         // 5. 生成并返回token
         Map<String, Object> result = new HashMap<>();
         result.put("token", jwtUtil.generateToken(openid,user.getId()));
         result.put("user", user);
+        result.put("isFirstLogin",isFirstLogin);
         return result;
     }
 
