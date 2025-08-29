@@ -62,12 +62,10 @@ public class UserService {
             user.setAvatar(avatar);
             user.setBalance(BigDecimal.ZERO);
             int insert = userMapper.insert(user);
-
             UserRoles userRoles = new UserRoles();
             userRoles.setUserId(Long.valueOf(String.valueOf(user.getId())));
             userRoles.setRoleId(Long.valueOf(USER_COURT.getId().toString()));
             userRolesMapper.insert(userRoles);
-
             UserAccount userAccount = new UserAccount();
             userAccount.setUserId(Long.valueOf(String.valueOf(user.getId())));
             userAccount.setBalance(BigDecimal.ZERO);
