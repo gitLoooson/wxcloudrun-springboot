@@ -79,6 +79,8 @@ public class UserService {
         result.put("token", jwtUtil.generateToken(openid,user.getId()));
         result.put("user", user);
         result.put("isFirstLogin",isFirstLogin);
+
+
         return result;
     }
 
