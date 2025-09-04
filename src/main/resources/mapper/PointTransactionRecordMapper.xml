@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.tencent.wxcloudrun.dao.TransactionRecordMapper">
+<mapper namespace="com.tencent.wxcloudrun.dao.PointTransactionRecordMapper">
 
     <insert id="insertTransactionRecord" keyProperty="id">
-        INSERT INTO transaction_record (
+        INSERT INTO point_transaction_record (
         user_id, order_id, amount, type, balance_before, balance_after,
         description, status, create_time
         ) VALUES (
@@ -12,35 +12,35 @@
         )
     </insert>
 
-    <select id="selectTransactionsByUser" resultType="com.tencent.wxcloudrun.model.TransactionRecord">
+    <select id="selectTransactionsByUser" resultType="com.tencent.wxcloudrun.model.PointTransactionRecord">
         SELECT tr.*, u.username, o.order_number
-        FROM transaction_record tr
+        FROM point_transaction_record tr
         LEFT JOIN user u ON tr.user_id = u.id
         LEFT JOIN `order` o ON tr.order_id = o.id
         WHERE tr.user_id = #{userId}
         ORDER BY tr.create_time DESC
     </select>
 
-    <select id="selectTransactionsByOrder" resultType="com.tencent.wxcloudrun.model.TransactionRecord">
+    <select id="selectTransactionsByOrder" resultType="com.tencent.wxcloudrun.model.PointTransactionRecord">
         SELECT tr.*, u.username, o.order_number
-        FROM transaction_record tr
+        FROM point_transaction_record tr
         LEFT JOIN user u ON tr.user_id = u.id
         LEFT JOIN `order` o ON tr.order_id = o.id
         WHERE tr.order_id = #{orderId}
         ORDER BY tr.create_time DESC
     </select>
 
-    <select id="selectTransactionById" resultType="com.tencent.wxcloudrun.model.TransactionRecord">
+    <select id="selectTransactionById" resultType="com.tencent.wxcloudrun.model.PointTransactionRecord">
         SELECT tr.*, u.username, o.order_number
-        FROM transaction_record tr
+        FROM point_transaction_record tr
         LEFT JOIN user u ON tr.user_id = u.id
         LEFT JOIN `order` o ON tr.order_id = o.id
         WHERE tr.id = #{id}
     </select>
 
-    <select id="selectTransactionsByUserId" resultType="com.tencent.wxcloudrun.model.TransactionRecord">
+    <select id="selectTransactionsByUserId" resultType="com.tencent.wxcloudrun.model.PointTransactionRecord">
         SELECT tr.*, u.username, o.order_number
-        FROM transaction_record tr
+        FROM point_transaction_record tr
         LEFT JOIN user u ON tr.user_id = u.id
         LEFT JOIN `order` o ON tr.order_id = o.id
         WHERE 1=1
@@ -50,7 +50,7 @@
 
     <select id="countTransactionsByCondition" resultType="int">
         SELECT COUNT(*)
-        FROM transaction_record tr
+        FROM point_transaction_record tr
         WHERE 1=1
         <if test="userId != null">
             AND tr.user_id = #{userId}
@@ -67,9 +67,9 @@
     </select>
 
     <!-- 获取用户最近交易记录 -->
-    <select id="selectRecentTransactions" resultType="com.tencent.wxcloudrun.model.TransactionRecord">
+    <select id="selectRecentTransactions" resultType="com.tencent.wxcloudrun.model.PointTransactionRecord">
         SELECT tr.*, u.username, o.order_number
-        FROM transaction_record tr
+        FROM point_transaction_record tr
         LEFT JOIN user u ON tr.user_id = u.id
         LEFT JOIN `order` o ON tr.order_id = o.id
         WHERE tr.user_id = #{userId}
@@ -80,7 +80,7 @@
     <!-- 按类型统计交易金额 -->
     <select id="sumAmountByType" resultType="java.math.BigDecimal">
         SELECT COALESCE(SUM(amount), 0)
-        FROM transaction_record
+        FROM point_transaction_record
         WHERE user_id = #{userId}
         AND type = #{type}
         <if test="startTime != null">
@@ -98,7 +98,7 @@
         type,
         COUNT(*) as count,
         SUM(amount) as total_amount
-        FROM transaction_record
+        FROM point_transaction_record
         WHERE create_time BETWEEN #{startDate} AND #{endDate}
         GROUP BY DATE(create_time), type
         ORDER BY date DESC, type
@@ -106,14 +106,14 @@
 
     <!-- 更新交易状态 -->
     <update id="updateTransactionStatus">
-        UPDATE transaction_record
+        UPDATE point_transaction_record
         SET status = #{status}
         WHERE id = #{id}
     </update>
 
     <!-- 批量插入交易记录 -->
     <insert id="insertBatchTransactions" parameterType="java.util.List">
-        INSERT INTO transaction_record (
+        INSERT INTO point_transaction_record (
         user_id, order_id, amount, type, balance_before, balance_after,
         description, status, create_time
         ) VALUES
@@ -128,7 +128,7 @@
 
     <!-- 根据订单ID删除交易记录 -->
     <delete id="deleteByOrderId">
-        DELETE FROM transaction_record WHERE order_id = #{orderId}
+        DELETE FROM point_transaction_record WHERE order_id = #{orderId}
     </delete>
 
     <!-- 获取用户交易金额汇总 -->
@@ -139,7 +139,7 @@
         SUM(CASE WHEN type = 'recharge' THEN amount ELSE 0 END) as total_recharge,
         SUM(CASE WHEN type = 'consumption' THEN amount ELSE 0 END) as total_consumption,
         SUM(CASE WHEN type = 'refund' THEN amount ELSE 0 END) as total_refund
-        FROM transaction_record
+        FROM point_transaction_record
         WHERE user_id = #{userId}
         GROUP BY user_id
     </select>

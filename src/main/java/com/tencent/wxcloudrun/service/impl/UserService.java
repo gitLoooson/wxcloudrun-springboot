@@ -3,12 +3,14 @@ package com.tencent.wxcloudrun.service.impl;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.tencent.wxcloudrun.dao.UserAccountMapper;
+import com.tencent.wxcloudrun.dao.UserCourtPointMapper;
 import com.tencent.wxcloudrun.dao.UserMapper;
 import com.tencent.wxcloudrun.dao.UserRolesMapper;
 import com.tencent.wxcloudrun.dto.UserWithRolesDTO;
 import com.tencent.wxcloudrun.jwt.JwtUtil;
 import com.tencent.wxcloudrun.model.User;
 import com.tencent.wxcloudrun.model.UserAccount;
+import com.tencent.wxcloudrun.model.UserCourtPoint;
 import com.tencent.wxcloudrun.model.UserRoles;
 import com.tencent.wxcloudrun.wx.WeChatUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +39,9 @@ public class UserService {
 
     @Autowired
     private UserAccountMapper userAccountMapper;
+
+    @Autowired
+    private UserCourtPointMapper userCourtPointMapper;
 
     @Transactional(rollbackFor = Exception.class)
     public Map<String, Object> loginOrRegister(String openid,String code, String username, String avatar) {
@@ -72,6 +77,12 @@ public class UserService {
             userAccount.setTotalConsumption(BigDecimal.ZERO);
             userAccount.setTotalRecharge(BigDecimal.ZERO);
             userAccountMapper.insertUserAccount(userAccount);
+            UserCourtPoint userCourtPoint = new UserCourtPoint();
+            userCourtPoint.setUserId(Long.valueOf(String.valueOf(user.getId())));
+            userCourtPoint.setBalance(BigDecimal.ZERO);
+            userCourtPoint.setTotalConsumption(BigDecimal.ZERO);
+            userCourtPoint.setTotalRecharge(BigDecimal.ZERO);
+            userCourtPointMapper.insert(userCourtPoint);
         }
 
         // 5. 生成并返回token

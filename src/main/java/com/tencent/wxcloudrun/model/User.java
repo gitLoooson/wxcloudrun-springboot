@@ -15,6 +15,7 @@ public class User implements Serializable {
     private String phoneNumber;
 
     private BigDecimal balance;
+    private BigDecimal pointBalance;
     private Date createTime;
     private Date updateTime;
 }

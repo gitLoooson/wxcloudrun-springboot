@@ -17,12 +17,13 @@ public class AsyncLogService {
     private MiniLogMapper logMapper;
 
     @Async("logTaskExecutor")
-    public void saveLog(Long userId, String description, String apiPath) {
+    public void saveLog(Long userId, String description, String apiPath,String params) {
         try {
             MiniLog logEntity = new MiniLog();
             logEntity.setUserId(userId);
             logEntity.setDescription(description);
             logEntity.setApiPath(apiPath);
+            logEntity.setParams(apiPath);
             logEntity.setCreateTime(LocalDateTime.now());
 
             logMapper.insert(logEntity);

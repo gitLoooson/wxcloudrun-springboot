@@ -2,12 +2,15 @@ package com.tencent.wxcloudrun.service.impl;
 
 import com.tencent.wxcloudrun.dao.BookingMapper;
 import com.tencent.wxcloudrun.dao.OrderMapper;
+import com.tencent.wxcloudrun.dao.PointTransactionRecordMapper;
 import com.tencent.wxcloudrun.dto.BatchBookingResult;
 import com.tencent.wxcloudrun.dto.BookingRequest;
+import com.tencent.wxcloudrun.dto.CreateOrderDTO;
 import com.tencent.wxcloudrun.dto.TimeSlotPrice;
 import com.tencent.wxcloudrun.enums.OrderStatus;
 import com.tencent.wxcloudrun.model.Booking;
 import com.tencent.wxcloudrun.model.Order;
+import com.tencent.wxcloudrun.model.PointTransactionRecord;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
@@ -25,7 +28,8 @@ public class BookingService {
     private final PricingService pricingService;
     private final OrderMapper orderMapper;
     private final UserAccountService userAccountService;
-
+    private final UserCourtPointService userCourtPointService;
+    private final PointTransactionRecordMapper pointTransactionRecordMapper;
     /**
      * 原子性批量预订 - 任何一个失败就全部回滚
      */
@@ -76,10 +80,10 @@ public class BookingService {
      * 创建带订单的原子性批量预订
      */
     @Transactional(rollbackFor = Exception.class)
-    public Order createOrderWithAtomicBookings(Long userId, List<BookingRequest> bookingRequests) {
+    public Order createOrderWithAtomicBookings(Long userId, CreateOrderDTO createOrderDTO) {
         // 1. 生成订单号
         String orderNumber = generateOrderNumber();
-
+        List<BookingRequest> bookingRequests =  createOrderDTO.getBookingRequests();
         // 2. 创建预订（原子性操作）
         BatchBookingResult bookingResult = createAtomicBatchBookings(userId, bookingRequests,orderNumber);
 
@@ -88,10 +92,14 @@ public class BookingService {
         }
 
         // 3. 计算订单总金额
-        BigDecimal totalAmount = bookingResult.getSuccessfulBookings().stream()
-                .map(Booking::getPrice)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
+        BigDecimal totalAmount;
+        if("point".equals(createOrderDTO.getOrderType())){
+            totalAmount = bookingResult.getSuccessfulBookings().stream()
+                    .map(Booking::getPrice)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+        }else{
+            totalAmount = BigDecimal.valueOf(bookingResult.getSuccessfulBookings().size());
+        }
         // 4. 创建订单
         Order order = new Order();
         order.setOrderNumber(orderNumber);
@@ -104,14 +112,24 @@ public class BookingService {
         orderMapper.insertOrder(order);
 
         orderMapper.updateBookingsOrderId(order.getId(), orderNumber);
-
-        // 扣款支付
-        boolean paymentSuccess = userAccountService.consume(
-                userId,
-                order.getTotalAmount(),
-                order.getId(),
-                "支付订单：" + order.getOrderNumber()
-        );
+        boolean paymentSuccess = false;
+        if("point".equals(createOrderDTO.getOrderType())){
+            // 扣款支付
+            paymentSuccess = userCourtPointService.consume(
+                    userId,
+                    order.getTotalAmount(),
+                    order.getId(),
+                    "支付订单：" + order.getOrderNumber()
+            );
+        }else{
+            // 扣款支付
+            paymentSuccess = userAccountService.consume(
+                    userId,
+                    order.getTotalAmount(),
+                    order.getId(),
+                    "支付订单：" + order.getOrderNumber()
+            );
+        }
 
         if (paymentSuccess) {
             // 更新订单状态为已确认
@@ -152,14 +170,24 @@ public class BookingService {
                     throw new RuntimeException("订单与预定时间不足24小时，不能取消!");
                 }
             }
-
-            // 3. 执行退款
-            boolean refundSuccess = userAccountService.refund(
-                    order.getUserId(),
-                    order.getTotalAmount(),
-                    orderId,
-                    "订单取消退款：" + (cancelReason != null ? cancelReason : "用户取消")
-            );
+            List<PointTransactionRecord> pointTransactionRecords = pointTransactionRecordMapper.selectTransactionsByOrder(orderId);
+            if(!pointTransactionRecords.isEmpty()){
+                // 3. 执行退款
+                boolean refundSuccess = userCourtPointService.refund(
+                        order.getUserId(),
+                        order.getTotalAmount(),
+                        orderId,
+                        "订单取消退款：" + (cancelReason != null ? cancelReason : "用户取消")
+                );
+            }else{
+                // 3. 执行退款
+                boolean refundSuccess = userAccountService.refund(
+                        order.getUserId(),
+                        order.getTotalAmount(),
+                        orderId,
+                        "订单取消退款：" + (cancelReason != null ? cancelReason : "用户取消")
+                );
+            }
             // 批量取消预订
             int affectedRows = bookingMapper.cancelBookingsByOrder(orderId, "cancelled");
         } catch (Exception e) {

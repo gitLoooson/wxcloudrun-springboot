@@ -1,7 +1,7 @@
 package com.tencent.wxcloudrun.dao;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.tencent.wxcloudrun.model.TransactionRecord;
+import com.tencent.wxcloudrun.model.PointTransactionRecord;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -9,16 +9,16 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Mapper
-public interface TransactionRecordMapper {
-    int insertTransactionRecord(TransactionRecord record);
-    List<TransactionRecord> selectTransactionsByUser(Long userId);
-    List<TransactionRecord> selectTransactionsByOrder(Long orderId);
-    TransactionRecord selectTransactionById(Long id);
+public interface PointTransactionRecordMapper {
+    int insertTransactionRecord(PointTransactionRecord record);
+    List<PointTransactionRecord> selectTransactionsByUser(Long userId);
+    List<PointTransactionRecord> selectTransactionsByOrder(Long orderId);
+    PointTransactionRecord selectTransactionById(Long id);
 
     // 分页查询
-    Page<TransactionRecord> selectTransactionsByUserId(
+    Page<PointTransactionRecord> selectTransactionsByUserId(
             @Param("userId") Long userId,
-            Page<TransactionRecord> page);
+            Page<PointTransactionRecord> page);
 
     int countTransactionsByCondition(@Param("userId") Long userId,
                                      @Param("type") String type,

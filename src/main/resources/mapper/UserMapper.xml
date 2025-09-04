@@ -34,8 +34,10 @@
     </select>
 
     <select id="getAllUserInfo" resultType="com.tencent.wxcloudrun.model.User">
-        SELECT u.*,uc.balance FROM user u
+        SELECT u.*,uc.balance,ucp.balance point_balance FROM user u
         left join user_account uc
         on u.id = uc.user_id
+        left join user_court_point ucp
+        on u.id = ucp.user_id
     </select>
 </mapper>

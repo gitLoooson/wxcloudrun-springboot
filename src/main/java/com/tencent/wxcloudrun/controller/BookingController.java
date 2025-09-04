@@ -4,6 +4,7 @@ import com.tencent.wxcloudrun.anno.MiniLog;
 import com.tencent.wxcloudrun.anno.RequestAttr;
 import com.tencent.wxcloudrun.config.ApiResponse;
 import com.tencent.wxcloudrun.dto.BookingRequest;
+import com.tencent.wxcloudrun.dto.CreateOrderDTO;
 import com.tencent.wxcloudrun.service.impl.BookingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/bookings")
@@ -24,11 +24,11 @@ public class BookingController {
     @MiniLog("创建订单")
     public ApiResponse createBatchBookings(
             HttpServletRequest request,
-            @RequestBody List<BookingRequest> bookingRequests
+            @RequestBody CreateOrderDTO createOrderDTO
             ) {
-        for (BookingRequest bookingRequest : bookingRequests) {
+        for (BookingRequest bookingRequest : createOrderDTO.getBookingRequests()) {
             bookingRequest.setUserId(RequestAttr.USER_ID.get(request));
         }
-        return ApiResponse.ok( bookingService.createOrderWithAtomicBookings(RequestAttr.USER_ID.get(request), bookingRequests) );
+        return ApiResponse.ok( bookingService.createOrderWithAtomicBookings(RequestAttr.USER_ID.get(request), createOrderDTO) );
     }
 }

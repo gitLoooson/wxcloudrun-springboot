@@ -16,4 +16,5 @@ public class MiniLog {
     private String description; // 操作描述
     private String apiPath;     // 接口路径
     private LocalDateTime createTime;
+    private String params;
 }
