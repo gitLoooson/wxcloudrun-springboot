@@ -94,6 +94,10 @@ public class UserService {
         return userMapper.updatePhoneNumber(user);
     }
 
+    public int updateUser(User user) {
+        return userMapper.update(user);
+    }
+
     public User getUserById(Long userId) {
         return userMapper.findByUserId(userId);
     }

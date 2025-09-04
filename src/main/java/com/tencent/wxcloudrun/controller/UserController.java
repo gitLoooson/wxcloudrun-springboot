@@ -27,6 +27,15 @@ public class UserController {
         return ApiResponse.ok(row);
     }
 
+    @PostMapping("/updateUser")
+    @MiniLog("更新电话号码")
+    public ApiResponse updateUser(HttpServletRequest request, @RequestBody User user) {
+        user.setOpenid(RequestAttr.OPEN_ID.get(request));
+        int row = userService.updateUser(user);
+        return ApiResponse.ok(row);
+    }
+
+
     @GetMapping("/getAllUserInfo")
     @MiniLog("管理员获取所有人的用户信息")
     @RequiresRoles({RoleEnum.ADMIN_COURT})

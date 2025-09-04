@@ -17,7 +17,7 @@ public interface UserMapper {
     @Options(useGeneratedKeys = true, keyProperty = "id")
     int insert(User user);
 
-    @Update("UPDATE user SET username=#{username}, avatar=#{avatar} WHERE openid=#{openid}")
+    @Update("UPDATE user SET username=#{username}, avatar=#{avatar},phone_number=#{phoneNumber} WHERE openid=#{openid}")
     int update(User user);
 
     Page<UserWithRolesDTO> selectAllUsersWithRoles(Page<UserWithRolesDTO> page);
