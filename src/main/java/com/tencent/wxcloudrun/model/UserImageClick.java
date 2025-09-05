@@ -10,4 +10,5 @@ public class UserImageClick {
     private Long userId;
     private Long imageId;
     private LocalDateTime createTime;
+    private String userName;
 }
