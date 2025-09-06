@@ -5,7 +5,7 @@
 <mapper namespace="com.tencent.wxcloudrun.dao.UserImageClickMapper">
 
     <select id="queryClicks" resultType="com.tencent.wxcloudrun.model.UserImageClick">
-        SELECT uic.id,user_id, image_id, uic.create_time,u.username
+        SELECT uic.id,user_id, image_id, uic.create_time,u.username,u.phone_number
         FROM user_image_click uic
         left join `user` u
         on uic.user_id = u.id

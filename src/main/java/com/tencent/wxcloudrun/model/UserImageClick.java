@@ -11,4 +11,5 @@ public class UserImageClick {
     private Long imageId;
     private LocalDateTime createTime;
     private String userName;
+    private String phoneNumber;
 }
