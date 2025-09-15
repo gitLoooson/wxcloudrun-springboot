@@ -11,7 +11,7 @@ public interface HotelRoomTypeMapper {
 
     // 查询所有上架房型（用于前端列表）
     @Select("SELECT id, name, images, price, original_price, details, cancel_policy " +
-            "FROM hotel_room_type WHERE status = 1 ORDER BY `order` DESC")
+            "FROM hotel_room_type WHERE status = 1 ORDER BY `order`")
     @Results({
             @Result(property = "id", column = "id"),
             @Result(property = "name", column = "name"),

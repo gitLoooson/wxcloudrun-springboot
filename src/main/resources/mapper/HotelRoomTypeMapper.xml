@@ -4,7 +4,7 @@
     <resultMap id="HotelRoomTypeResultMap" type="com.tencent.wxcloudrun.model.HotelRoomType">
         <id property="id" column="id"/>
         <result property="name" column="name"/>
-        <result property="image" column="image"/>
+        <result property="images" column="images"/>
         <result property="price" column="price"/>
         <result property="originalPrice" column="original_price"/>
         <result property="details" column="details" typeHandler="com.tencent.wxcloudrun.handle.JsonArrayTypeHandler"/>
@@ -25,7 +25,7 @@
         INSERT INTO hotel_room_type (
             name, images, price, original_price, details, cancel_policy, status
         ) VALUES (
-                     #{name}, #{image}, #{price}, #{originalPrice},
+                     #{name}, #{images}, #{price}, #{originalPrice},
                      #{details, typeHandler=com.tencent.wxcloudrun.handle.JsonArrayTypeHandler},
                      #{cancelPolicy}, #{status}
                  )
