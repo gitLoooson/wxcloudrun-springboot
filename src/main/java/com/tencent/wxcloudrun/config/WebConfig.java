@@ -34,7 +34,8 @@ public class WebConfig implements WebMvcConfigurer {
                         "/v2/api-docs",      // 放行api文档
                         "/doc.html",          // 放行swagger-ui
                         "/images/getAllImages", // 放行获取所有图片接口
-                        "/api/pricing/time-slots/formatted"
+                        "/api/pricing/time-slots/formatted",
+                        "/api/rooms/list" // 获取所有房型不拦截
                 );
 
         registry.addInterceptor(roleInterceptor)

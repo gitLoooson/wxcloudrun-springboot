@@ -1,0 +1,56 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tencent.wxcloudrun.dao.HotelRoomTypeMapper">
+
+    <resultMap id="HotelRoomTypeResultMap" type="com.tencent.wxcloudrun.model.HotelRoomType">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="image" column="image"/>
+        <result property="price" column="price"/>
+        <result property="originalPrice" column="original_price"/>
+        <result property="details" column="details" typeHandler="com.tencent.wxcloudrun.handle.JsonArrayTypeHandler"/>
+        <result property="cancelPolicy" column="cancel_policy"/>
+        <result property="status" column="status"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+
+    <!-- 根据ID查询房型详情 -->
+    <select id="selectRoomById" resultMap="HotelRoomTypeResultMap">
+        SELECT * FROM hotel_room_type WHERE id = #{id}
+    </select>
+
+    <!-- 新增房型 -->
+    <insert id="insertRoom" parameterType="com.tencent.wxcloudrun.model.HotelRoomType" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO hotel_room_type (
+            name, images, price, original_price, details, cancel_policy, status
+        ) VALUES (
+                     #{name}, #{image}, #{price}, #{originalPrice},
+                     #{details, typeHandler=com.tencent.wxcloudrun.handle.JsonArrayTypeHandler},
+                     #{cancelPolicy}, #{status}
+                 )
+    </insert>
+
+    <!-- 更新房型 -->
+    <update id="updateRoom" parameterType="com.tencent.wxcloudrun.model.HotelRoomType">
+        UPDATE hotel_room_type
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="images != null">image = #{images},</if>
+            <if test="price != null">price = #{price},</if>
+            <if test="originalPrice != null">original_price = #{originalPrice},</if>
+            <if test="details != null">details = #{details, com.tencent.wxcloudrun.handle.JsonArrayTypeHandler},</if>
+            <if test="cancelPolicy != null">cancel_policy = #{cancelPolicy},</if>
+            <if test="status != null">status = #{status},</if>
+            update_time = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 删除房型（逻辑删除） -->
+    <update id="deleteRoom">
+        UPDATE hotel_room_type
+        SET status = 0, update_time = NOW()
+        WHERE id = #{id}
+    </update>
+</mapper>
