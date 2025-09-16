@@ -12,6 +12,10 @@
         <result property="status" column="status"/>
         <result property="createTime" column="create_time"/>
         <result property="updateTime" column="update_time"/>
+        <result property="roomSizeDesc" column="room_size_desc"/>
+        <result property="roomTypeDesc" column="room_type_desc"/>
+        <result property="pepoleNumber" column="pepole_number"/>
+        <result property="breakfast" column="breakfast"/>
     </resultMap>
 
 
@@ -23,11 +27,12 @@
     <!-- 新增房型 -->
     <insert id="insertRoom" parameterType="com.tencent.wxcloudrun.model.HotelRoomType" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO hotel_room_type (
-            name, images, price, original_price, details, cancel_policy, status
+            name, images, price, original_price, details, cancel_policy, status,room_size_desc,room_type_desc,pepole_number,breakfast
         ) VALUES (
                      #{name}, #{images}, #{price}, #{originalPrice},
                      #{details, typeHandler=com.tencent.wxcloudrun.handle.JsonArrayTypeHandler},
                      #{cancelPolicy}, #{status}
+                     ,#{roomSizeDesc},#{roomTypeDesc},#{pepoleNumber},#{breakfast}
                  )
     </insert>
 
@@ -42,6 +47,10 @@
             <if test="details != null">details = #{details, com.tencent.wxcloudrun.handle.JsonArrayTypeHandler},</if>
             <if test="cancelPolicy != null">cancel_policy = #{cancelPolicy},</if>
             <if test="status != null">status = #{status},</if>
+            <if test="roomSizeDesc != null">room_size_desc = #{roomSizeDesc},</if>
+            <if test="roomTypeDesc != null">room_type_desc = #{roomTypeDesc},</if>
+            <if test="pepoleNumber != null">pepole_number = #{pepoleNumber},</if>
+            <if test="breakfast != null">breakfast = #{breakfast},</if>
             update_time = NOW()
         </set>
         WHERE id = #{id}

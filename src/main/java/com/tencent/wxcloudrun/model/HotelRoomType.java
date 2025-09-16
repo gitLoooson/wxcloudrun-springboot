@@ -17,4 +17,9 @@ public class HotelRoomType {
     private Integer status;
     private Date createTime;
     private Date updateTime;
+
+    private String roomSizeDesc;
+    private String roomTypeDesc;
+    private String pepoleNumber;
+    private String breakfast;
 }
