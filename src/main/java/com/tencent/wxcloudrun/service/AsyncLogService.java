@@ -23,7 +23,7 @@ public class AsyncLogService {
             logEntity.setUserId(userId);
             logEntity.setDescription(description);
             logEntity.setApiPath(apiPath);
-            logEntity.setParams(apiPath);
+            logEntity.setParams(params);
             logEntity.setCreateTime(LocalDateTime.now());
 
             logMapper.insert(logEntity);

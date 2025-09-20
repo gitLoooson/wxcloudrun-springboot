@@ -94,11 +94,11 @@ public class BookingService {
         // 3. 计算订单总金额
         BigDecimal totalAmount;
         if("point".equals(createOrderDTO.getOrderType())){
+            totalAmount = BigDecimal.valueOf(bookingResult.getSuccessfulBookings().size());
+        }else{
             totalAmount = bookingResult.getSuccessfulBookings().stream()
                     .map(Booking::getPrice)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
-        }else{
-            totalAmount = BigDecimal.valueOf(bookingResult.getSuccessfulBookings().size());
         }
         // 4. 创建订单
         Order order = new Order();
